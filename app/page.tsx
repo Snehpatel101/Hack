@@ -9,6 +9,7 @@ import PlanView from "../components/PlanView";
 import QUBOVisualization from "../components/QUBOVisualization";
 import RiskAlert from "../components/RiskAlert";
 import ChatBot from "../components/ChatBot";
+import ConversationalIntake from "../components/ConversationalIntake";
 import CategoryPieChart from "../components/CategoryPieChart";
 import CollapsibleSection from "../components/CollapsibleSection";
 import EquityCurve from "../components/EquityCurve";
@@ -16,15 +17,15 @@ import LanguageSelector from "../components/LanguageSelector";
 import type { CopilotResponse } from "../lib/types";
 
 const TRANSLATIONS: Record<string, Record<string, string>> = {
-  en: { getStarted: "Get Started", upload: "Upload your bank transactions (CSV or JSON) and we will analyze your finances to create a personalized action plan.", fewDetails: "A Few Details", generatePlan: "Generate Financial Plan", startOver: "Start Over" },
-  es: { getStarted: "Comenzar", upload: "Sube tus transacciones bancarias (CSV o JSON) y analizaremos tus finanzas para crear un plan de accion personalizado.", fewDetails: "Algunos Detalles", generatePlan: "Generar Plan Financiero", startOver: "Comenzar De Nuevo" },
-  fr: { getStarted: "Commencer", upload: "Telechargez vos transactions bancaires (CSV ou JSON) et nous analyserons vos finances pour creer un plan d'action personnalise.", fewDetails: "Quelques Details", generatePlan: "Generer le Plan Financier", startOver: "Recommencer" },
-  zh: { getStarted: "\u5f00\u59cb", upload: "\u4e0a\u4f20\u60a8\u7684\u94f6\u884c\u4ea4\u6613\u8bb0\u5f55\uff08CSV \u6216 JSON\uff09\uff0c\u6211\u4eec\u5c06\u5206\u6790\u60a8\u7684\u8d22\u52a1\u72b6\u51b5\u5e76\u521b\u5efa\u4e2a\u6027\u5316\u884c\u52a8\u8ba1\u5212\u3002", fewDetails: "\u4e00\u4e9b\u7ec6\u8282", generatePlan: "\u751f\u6210\u8d22\u52a1\u8ba1\u5212", startOver: "\u91cd\u65b0\u5f00\u59cb" },
-  hi: { getStarted: "\u0936\u0941\u0930\u0942 \u0915\u0930\u0947\u0902", upload: "\u0905\u092a\u0928\u0947 \u092c\u0948\u0902\u0915 \u0932\u0947\u0928\u0926\u0947\u0928 (CSV \u092f\u093e JSON) \u0905\u092a\u0932\u094b\u0921 \u0915\u0930\u0947\u0902 \u0914\u0930 \u0939\u092e \u0906\u092a\u0915\u0940 \u0935\u093f\u0924\u094d\u0924\u0940\u092f \u0938\u094d\u0925\u093f\u0924\u093f \u0915\u093e \u0935\u093f\u0936\u094d\u0932\u0947\u0937\u0923 \u0915\u0930\u0947\u0902\u0917\u0947\u0964", fewDetails: "\u0915\u0941\u091b \u0935\u093f\u0935\u0930\u0923", generatePlan: "\u0935\u093f\u0924\u094d\u0924\u0940\u092f \u092f\u094b\u091c\u0928\u093e \u092c\u0928\u093e\u090f\u0902", startOver: "\u092b\u093f\u0930 \u0938\u0947 \u0936\u0941\u0930\u0942 \u0915\u0930\u0947\u0902" },
-  ar: { getStarted: "\u0627\u0628\u062f\u0623", upload: "\u0642\u0645 \u0628\u062a\u062d\u0645\u064a\u0644 \u0645\u0639\u0627\u0645\u0644\u0627\u062a\u0643 \u0627\u0644\u0645\u0635\u0631\u0641\u064a\u0629 (CSV \u0623\u0648 JSON) \u0648\u0633\u0646\u0642\u0648\u0645 \u0628\u062a\u062d\u0644\u064a\u0644 \u0623\u0645\u0648\u0627\u0644\u0643 \u0644\u0625\u0646\u0634\u0627\u0621 \u062e\u0637\u0629 \u0639\u0645\u0644 \u0645\u062e\u0635\u0635\u0629.", fewDetails: "\u0628\u0639\u0636 \u0627\u0644\u062a\u0641\u0627\u0635\u064a\u0644", generatePlan: "\u0625\u0646\u0634\u0627\u0621 \u062e\u0637\u0629 \u0645\u0627\u0644\u064a\u0629", startOver: "\u0627\u0628\u062f\u0623 \u0645\u0646 \u062c\u062f\u064a\u062f" },
+  en: { getStarted: "Get Started", upload: "Upload your bank transactions (CSV or JSON) and we will analyze your finances to create a personalized action plan.", fewDetails: "A Few Details", generatePlan: "Generate Financial Plan", startOver: "Start Over", talkToAI: "Talk to our AI instead" },
+  es: { getStarted: "Comenzar", upload: "Sube tus transacciones bancarias (CSV o JSON) y analizaremos tus finanzas para crear un plan de accion personalizado.", fewDetails: "Algunos Detalles", generatePlan: "Generar Plan Financiero", startOver: "Comenzar De Nuevo", talkToAI: "Habla con nuestra IA" },
+  fr: { getStarted: "Commencer", upload: "Telechargez vos transactions bancaires (CSV ou JSON) et nous analyserons vos finances pour creer un plan d'action personnalise.", fewDetails: "Quelques Details", generatePlan: "Generer le Plan Financier", startOver: "Recommencer", talkToAI: "Parler a notre IA" },
+  zh: { getStarted: "\u5f00\u59cb", upload: "\u4e0a\u4f20\u60a8\u7684\u94f6\u884c\u4ea4\u6613\u8bb0\u5f55\uff08CSV \u6216 JSON\uff09\uff0c\u6211\u4eec\u5c06\u5206\u6790\u60a8\u7684\u8d22\u52a1\u72b6\u51b5\u5e76\u521b\u5efa\u4e2a\u6027\u5316\u884c\u52a8\u8ba1\u5212\u3002", fewDetails: "\u4e00\u4e9b\u7ec6\u8282", generatePlan: "\u751f\u6210\u8d22\u52a1\u8ba1\u5212", startOver: "\u91cd\u65b0\u5f00\u59cb", talkToAI: "\u4e0e\u6211\u4eec\u7684AI\u5bf9\u8bdd" },
+  hi: { getStarted: "\u0936\u0941\u0930\u0942 \u0915\u0930\u0947\u0902", upload: "\u0905\u092a\u0928\u0947 \u092c\u0948\u0902\u0915 \u0932\u0947\u0928\u0926\u0947\u0928 (CSV \u092f\u093e JSON) \u0905\u092a\u0932\u094b\u0921 \u0915\u0930\u0947\u0902 \u0914\u0930 \u0939\u092e \u0906\u092a\u0915\u0940 \u0935\u093f\u0924\u094d\u0924\u0940\u092f \u0938\u094d\u0925\u093f\u0924\u093f \u0915\u093e \u0935\u093f\u0936\u094d\u0932\u0947\u0937\u0923 \u0915\u0930\u0947\u0902\u0917\u0947\u0964", fewDetails: "\u0915\u0941\u091b \u0935\u093f\u0935\u0930\u0923", generatePlan: "\u0935\u093f\u0924\u094d\u0924\u0940\u092f \u092f\u094b\u091c\u0928\u093e \u092c\u0928\u093e\u090f\u0902", startOver: "\u092b\u093f\u0930 \u0938\u0947 \u0936\u0941\u0930\u0942 \u0915\u0930\u0947\u0902", talkToAI: "\u0939\u092e\u093e\u0930\u0940 AI \u0938\u0947 \u092c\u093e\u0924 \u0915\u0930\u0947\u0902" },
+  ar: { getStarted: "\u0627\u0628\u062f\u0623", upload: "\u0642\u0645 \u0628\u062a\u062d\u0645\u064a\u0644 \u0645\u0639\u0627\u0645\u0644\u0627\u062a\u0643 \u0627\u0644\u0645\u0635\u0631\u0641\u064a\u0629 (CSV \u0623\u0648 JSON) \u0648\u0633\u0646\u0642\u0648\u0645 \u0628\u062a\u062d\u0644\u064a\u0644 \u0623\u0645\u0648\u0627\u0644\u0643 \u0644\u0625\u0646\u0634\u0627\u0621 \u062e\u0637\u0629 \u0639\u0645\u0644 \u0645\u062e\u0635\u0635\u0629.", fewDetails: "\u0628\u0639\u0636 \u0627\u0644\u062a\u0641\u0627\u0635\u064a\u0644", generatePlan: "\u0625\u0646\u0634\u0627\u0621 \u062e\u0637\u0629 \u0645\u0627\u0644\u064a\u0629", startOver: "\u0627\u0628\u062f\u0623 \u0645\u0646 \u062c\u062f\u064a\u062f", talkToAI: "\u062a\u062d\u062f\u062b \u0645\u0639 \u0627\u0644\u0630\u0643\u0627\u0621 \u0627\u0644\u0627\u0635\u0637\u0646\u0627\u0639\u064a" },
 };
 
-type Stage = "upload" | "profile" | "loading" | "results";
+type Stage = "upload" | "chat-intake" | "profile" | "loading" | "results";
 
 export default function Home() {
   const [stage, setStage] = useState<Stage>("upload");
@@ -115,6 +116,51 @@ export default function Home() {
     [file, isDemoMode]
   );
 
+  const handleIntakeComplete = useCallback(
+    async (data: {
+      csvContent: string;
+      profile: {
+        checking_balance: number;
+        monthly_income: number;
+        goal: string;
+        debts?: Array<{ name: string; balance: number; apr: number; minimum_payment: number; due_day: number }>;
+        income?: Array<{ source: string; amount: number; frequency: "monthly"; next_date: string }>;
+      };
+    }) => {
+      setStage("loading");
+      setError(null);
+      setLoadingStep("Building your financial profile...");
+
+      try {
+        const formData = new FormData();
+        const csvBlob = new Blob([data.csvContent], { type: "text/csv" });
+        formData.append("file", csvBlob, "ai_intake.csv");
+        formData.append("profile", JSON.stringify(data.profile));
+
+        setLoadingStep("AI agent is analyzing your finances...");
+
+        const res = await fetch("/api/pipeline", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.error || `Server error: ${res.status}`);
+        }
+
+        const result: CopilotResponse = await res.json();
+        setResult(result);
+        setStage("results");
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : "Something went wrong. Please try again.";
+        setError(message);
+        setStage("upload");
+      }
+    },
+    []
+  );
+
   const handleReset = useCallback(() => {
     setStage("upload");
     setFile(null);
@@ -194,10 +240,56 @@ export default function Home() {
                 isLoading={false}
               />
             </div>
+
+            {/* AI Conversation Option */}
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-slate-700/50" />
+              </div>
+              <div className="relative flex justify-center text-xs">
+                <span className="bg-[#0f172a] px-3 text-slate-500">or</span>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setStage("chat-intake")}
+              className="w-full bg-[#1e293b] rounded-xl shadow-lg shadow-black/20 border border-slate-600/50 p-6 card-glow text-left hover:border-teal-500/50 transition-all duration-300 group"
+            >
+              <div className="flex items-center gap-4">
+                <div className="flex-shrink-0 w-12 h-12 rounded-full bg-teal-500/20 flex items-center justify-center">
+                  <svg className="w-6 h-6 text-teal-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold text-slate-100 group-hover:text-teal-300 transition-colors">
+                    {t("talkToAI")}
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Answer a few questions and we will build your financial profile automatically.
+                  </p>
+                </div>
+                <svg className="w-5 h-5 text-slate-600 group-hover:text-teal-400 transition-colors ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </button>
+
             <p className="text-center text-xs text-slate-500 mt-4">
               Your data stays on this device. We do not store or share your
               financial information.
             </p>
+          </div>
+        )}
+
+        {/* Stage: Chat Intake */}
+        {stage === "chat-intake" && (
+          <div className="max-w-2xl mx-auto animate-slide-up">
+            <ConversationalIntake
+              key={sessionKey}
+              onComplete={handleIntakeComplete}
+              onBack={() => setStage("upload")}
+            />
           </div>
         )}
 
