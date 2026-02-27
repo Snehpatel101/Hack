@@ -14,7 +14,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Equity Finance Copilot",
+  title: "One Day or Day One — Equity Finance Copilot",
   description:
     "AI-powered financial coaching for cashflow stability, debt payoff, and emergency savings — built with equity in mind.",
 };
@@ -27,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-slate-50 text-slate-800`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-animated-gradient text-gray-100`}
       >
         {children}
       </body>

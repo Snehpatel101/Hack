@@ -30,17 +30,17 @@ function formatCurrencyPrecise(amount: number): string {
 }
 
 const RISK_COLORS: Record<RiskWindow["risk_level"], { bg: string; text: string; dot: string }> = {
-  critical: { bg: "bg-red-50", text: "text-red-700", dot: "bg-red-600" },
-  high: { bg: "bg-orange-50", text: "text-orange-700", dot: "bg-orange-500" },
-  medium: { bg: "bg-yellow-50", text: "text-yellow-700", dot: "bg-yellow-500" },
-  low: { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-500" },
+  critical: { bg: "bg-red-900/30", text: "text-red-400", dot: "bg-red-500" },
+  high: { bg: "bg-orange-900/30", text: "text-orange-400", dot: "bg-orange-500" },
+  medium: { bg: "bg-yellow-900/30", text: "text-yellow-400", dot: "bg-yellow-500" },
+  low: { bg: "bg-emerald-900/30", text: "text-emerald-400", dot: "bg-emerald-500" },
 };
 
 const RISK_BADGE_COLORS: Record<RiskWindow["risk_level"], string> = {
-  critical: "bg-red-100 text-red-800",
-  high: "bg-orange-100 text-orange-800",
-  medium: "bg-yellow-100 text-yellow-800",
-  low: "bg-emerald-100 text-emerald-800",
+  critical: "bg-red-500/20 text-red-400",
+  high: "bg-orange-500/20 text-orange-400",
+  medium: "bg-yellow-500/20 text-yellow-400",
+  low: "bg-emerald-500/20 text-emerald-400",
 };
 
 export default function SnapshotView({ snapshot }: SnapshotViewProps) {
@@ -59,53 +59,53 @@ export default function SnapshotView({ snapshot }: SnapshotViewProps) {
   );
 
   const spendingCategories = [
-    { label: "Essentials", value: spending.essentials, color: "bg-indigo-500" },
-    { label: "Discretionary", value: spending.discretionary, color: "bg-violet-400" },
-    { label: "Debt Payments", value: spending.debt_payments, color: "bg-rose-400" },
-    { label: "Subscriptions", value: spending.subscriptions, color: "bg-amber-400" },
+    { label: "Essentials", value: spending.essentials, color: "bg-orange-500" },
+    { label: "Discretionary", value: spending.discretionary, color: "bg-amber-400" },
+    { label: "Debt Payments", value: spending.debt_payments, color: "bg-red-500" },
+    { label: "Subscriptions", value: spending.subscriptions, color: "bg-orange-300" },
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-fade-in">
       {/* Header Stats */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <StatCard
           label="Checking Balance"
           value={formatCurrency(snapshot.checking_balance)}
-          accent={snapshot.checking_balance < 200 ? "text-red-600" : "text-slate-800"}
+          accent={snapshot.checking_balance < 200 ? "text-red-400" : "text-orange-400"}
         />
         <StatCard
           label="Monthly Income"
           value={formatCurrency(snapshot.monthly_income)}
-          accent="text-emerald-600"
+          accent="text-emerald-400"
         />
         <StatCard
           label="Monthly Spending"
           value={formatCurrency(totalSpending)}
-          accent="text-slate-800"
+          accent="text-gray-100"
         />
         <StatCard
           label="Free Cash"
           value={formatCurrency(snapshot.free_cash_monthly)}
-          accent={snapshot.free_cash_monthly < 50 ? "text-red-600" : "text-emerald-600"}
+          accent={snapshot.free_cash_monthly < 50 ? "text-red-400" : "text-emerald-400"}
         />
       </div>
 
       {/* Monthly Spending Breakdown */}
-      <section className="rounded-xl bg-white p-6 shadow-sm">
-        <h3 className="text-sm font-semibold text-slate-800">
+      <section className="rounded-xl bg-card border border-gray-700/50 p-6 shadow-lg shadow-black/20 card-glow transition-all duration-300">
+        <h3 className="text-sm font-semibold text-gray-100">
           Monthly Spending Breakdown
         </h3>
         <div className="mt-4 space-y-3">
           {spendingCategories.map((cat) => (
             <div key={cat.label}>
               <div className="flex items-center justify-between text-xs">
-                <span className="font-medium text-slate-700">{cat.label}</span>
-                <span className="text-slate-500">
+                <span className="font-medium text-gray-300">{cat.label}</span>
+                <span className="text-gray-500">
                   {formatCurrency(cat.value)}
                 </span>
               </div>
-              <div className="mt-1 h-2.5 w-full overflow-hidden rounded-full bg-slate-100">
+              <div className="mt-1 h-2.5 w-full overflow-hidden rounded-full bg-gray-800">
                 <div
                   className={`h-full rounded-full ${cat.color} transition-all duration-500`}
                   style={{
@@ -121,18 +121,18 @@ export default function SnapshotView({ snapshot }: SnapshotViewProps) {
             </div>
           ))}
         </div>
-        <p className="mt-3 text-xs text-slate-500">
+        <p className="mt-3 text-xs text-gray-500">
           Total: {formatCurrency(totalSpending)} / month
         </p>
       </section>
 
       {/* Risk Windows */}
       {snapshot.risk_windows.length > 0 && (
-        <section className="rounded-xl bg-white p-6 shadow-sm">
-          <h3 className="text-sm font-semibold text-slate-800">
+        <section className="rounded-xl bg-card border border-gray-700/50 p-6 shadow-lg shadow-black/20 card-glow transition-all duration-300">
+          <h3 className="text-sm font-semibold text-gray-100">
             Risk Windows
           </h3>
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-1 text-xs text-gray-500">
             Upcoming dates when your balance may be dangerously low.
           </p>
           <div className="mt-4 space-y-2">
@@ -145,11 +145,11 @@ export default function SnapshotView({ snapshot }: SnapshotViewProps) {
 
       {/* Subscription Leaks */}
       {snapshot.subscription_leaks.length > 0 && (
-        <section className="rounded-xl bg-white p-6 shadow-sm">
-          <h3 className="text-sm font-semibold text-slate-800">
+        <section className="rounded-xl bg-card border border-gray-700/50 p-6 shadow-lg shadow-black/20 card-glow transition-all duration-300">
+          <h3 className="text-sm font-semibold text-gray-100">
             Subscription Leaks
           </h3>
-          <p className="mt-1 text-xs text-slate-500">
+          <p className="mt-1 text-xs text-gray-500">
             Subscriptions that may be wasting your money.
           </p>
           <div className="mt-4 space-y-2">
@@ -162,21 +162,21 @@ export default function SnapshotView({ snapshot }: SnapshotViewProps) {
 
       {/* Debts */}
       {snapshot.debts.length > 0 && (
-        <section className="rounded-xl bg-white p-6 shadow-sm">
-          <h3 className="text-sm font-semibold text-slate-800">Debts</h3>
+        <section className="rounded-xl bg-card border border-gray-700/50 p-6 shadow-lg shadow-black/20 card-glow transition-all duration-300">
+          <h3 className="text-sm font-semibold text-gray-100">Debts</h3>
           <div className="mt-4 overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-slate-200">
-                  <th className="pb-2 pr-4 font-medium text-slate-500">Name</th>
-                  <th className="pb-2 pr-4 font-medium text-slate-500">Balance</th>
-                  <th className="pb-2 pr-4 font-medium text-slate-500">APR</th>
-                  <th className="pb-2 pr-4 font-medium text-slate-500">Min Payment</th>
-                  <th className="pb-2 pr-4 font-medium text-slate-500">Monthly Interest</th>
-                  <th className="pb-2 font-medium text-slate-500">Payoff (months)</th>
+                <tr className="border-b border-gray-700/50">
+                  <th className="pb-2 pr-4 font-medium text-gray-500">Name</th>
+                  <th className="pb-2 pr-4 font-medium text-gray-500">Balance</th>
+                  <th className="pb-2 pr-4 font-medium text-gray-500">APR</th>
+                  <th className="pb-2 pr-4 font-medium text-gray-500">Min Payment</th>
+                  <th className="pb-2 pr-4 font-medium text-gray-500">Monthly Interest</th>
+                  <th className="pb-2 font-medium text-gray-500">Payoff (months)</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-gray-800">
                 {snapshot.debts.map((debt, i) => (
                   <DebtRow key={i} debt={debt} />
                 ))}
@@ -187,7 +187,7 @@ export default function SnapshotView({ snapshot }: SnapshotViewProps) {
       )}
 
       {/* Meta */}
-      <p className="text-center text-xs text-slate-400">
+      <p className="text-center text-xs text-gray-600">
         Snapshot as of {snapshot.as_of} | Goal: {snapshot.goal}
       </p>
     </div>
@@ -204,8 +204,8 @@ function StatCard({
   accent: string;
 }) {
   return (
-    <div className="rounded-xl bg-white p-4 shadow-sm">
-      <p className="text-xs font-medium text-slate-500">{label}</p>
+    <div className="rounded-xl bg-card border border-gray-700/50 p-4 shadow-lg shadow-black/20 card-glow transition-all duration-300">
+      <p className="text-xs font-medium text-gray-500">{label}</p>
       <p className={`mt-1 text-lg font-bold ${accent}`}>{value}</p>
     </div>
   );
@@ -216,7 +216,7 @@ function RiskWindowRow({ riskWindow }: { riskWindow: RiskWindow }) {
   const badgeColor = RISK_BADGE_COLORS[riskWindow.risk_level];
 
   return (
-    <div className={`rounded-lg ${colors.bg} p-3`}>
+    <div className={`rounded-lg ${colors.bg} border border-gray-700/30 p-3`}>
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-start gap-2">
           <span
@@ -227,11 +227,11 @@ function RiskWindowRow({ riskWindow }: { riskWindow: RiskWindow }) {
             <p className={`text-sm font-medium ${colors.text}`}>
               {riskWindow.description}
             </p>
-            <p className="mt-0.5 text-xs text-slate-500">
+            <p className="mt-0.5 text-xs text-gray-500">
               {riskWindow.date} &mdash; Projected balance:{" "}
               {formatCurrencyPrecise(riskWindow.projected_balance)}
             </p>
-            <p className="mt-1 text-xs text-slate-600">
+            <p className="mt-1 text-xs text-gray-400">
               {riskWindow.suggestion}
             </p>
           </div>
@@ -248,9 +248,9 @@ function RiskWindowRow({ riskWindow }: { riskWindow: RiskWindow }) {
 
 function SubscriptionLeakRow({ subscription }: { subscription: Subscription }) {
   return (
-    <div className="flex items-center justify-between rounded-lg bg-amber-50 px-4 py-3">
+    <div className="flex items-center justify-between rounded-lg bg-amber-500/10 border border-amber-500/20 px-4 py-3">
       <div className="flex items-center gap-2">
-        <span className="text-amber-500" aria-hidden="true">
+        <span className="text-amber-400" aria-hidden="true">
           <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
             <path
               fillRule="evenodd"
@@ -260,15 +260,15 @@ function SubscriptionLeakRow({ subscription }: { subscription: Subscription }) {
           </svg>
         </span>
         <div>
-          <p className="text-sm font-medium text-amber-800">
+          <p className="text-sm font-medium text-amber-300">
             {subscription.name}
           </p>
           {subscription.leak_reason && (
-            <p className="text-xs text-amber-600">{subscription.leak_reason}</p>
+            <p className="text-xs text-amber-400/70">{subscription.leak_reason}</p>
           )}
         </div>
       </div>
-      <span className="text-sm font-semibold text-amber-800">
+      <span className="text-sm font-semibold text-amber-300">
         {formatCurrencyPrecise(subscription.amount)}/mo
       </span>
     </div>
@@ -276,22 +276,22 @@ function SubscriptionLeakRow({ subscription }: { subscription: Subscription }) {
 }
 
 function DebtRow({ debt }: { debt: DebtInfo }) {
-  const aprClass = debt.apr >= 20 ? "text-red-600 font-semibold" : "text-slate-800";
+  const aprClass = debt.apr >= 20 ? "text-red-400 font-semibold" : "text-gray-300";
 
   return (
     <tr>
-      <td className="py-2 pr-4 font-medium text-slate-800">{debt.name}</td>
-      <td className="py-2 pr-4 text-slate-800">
+      <td className="py-2 pr-4 font-medium text-gray-200">{debt.name}</td>
+      <td className="py-2 pr-4 text-gray-300">
         {formatCurrencyPrecise(debt.balance)}
       </td>
       <td className={`py-2 pr-4 ${aprClass}`}>{debt.apr.toFixed(1)}%</td>
-      <td className="py-2 pr-4 text-slate-800">
+      <td className="py-2 pr-4 text-gray-300">
         {formatCurrencyPrecise(debt.minimum_payment)}
       </td>
-      <td className="py-2 pr-4 text-slate-800">
+      <td className="py-2 pr-4 text-gray-300">
         {formatCurrencyPrecise(debt.monthly_interest)}
       </td>
-      <td className="py-2 text-slate-800">{debt.payoff_months_minimum}</td>
+      <td className="py-2 text-gray-300">{debt.payoff_months_minimum}</td>
     </tr>
   );
 }

@@ -3,21 +3,100 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: #0a0a0a;
+  --foreground: #f5f5f5;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Animated gradient background */
+.bg-animated-gradient {
+  background: linear-gradient(
+    135deg,
+    #0a0a0a 0%,
+    #1a1207 25%,
+    #0a0a0a 50%,
+    #0f1a0a 75%,
+    #0a0a0a 100%
+  );
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Glow effect for cards on hover */
+.card-glow {
+  transition: all 0.3s ease;
+}
+.card-glow:hover {
+  box-shadow: 0 0 15px rgba(249, 115, 22, 0.15),
+    0 0 30px rgba(249, 115, 22, 0.05);
+  border-color: rgba(249, 115, 22, 0.3);
+}
+
+/* Animated border gradient */
+.border-gradient {
+  position: relative;
+}
+.border-gradient::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, #f97316, #f59e0b, #f97316);
+  background-size: 200% 200%;
+  animation: gradientShift 3s ease infinite;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #141414;
+}
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Loading shimmer */
+.shimmer {
+  background: linear-gradient(90deg, #141414 25%, #1a1a1a 50%, #141414 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 @layer utilities {

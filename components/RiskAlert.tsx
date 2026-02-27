@@ -10,12 +10,17 @@ export default function RiskAlert({ alerts }: RiskAlertProps) {
   return (
     <div
       role="alert"
-      className="rounded-xl border border-red-200 bg-gradient-to-r from-red-50 to-amber-50 p-4 shadow-sm"
+      className="rounded-xl border border-red-500/30 bg-gradient-to-r from-red-900/30 to-red-800/20 p-4 shadow-lg shadow-red-500/10 animate-pulse-glow animate-slide-up"
+      style={{
+        animationName: "pulseGlow",
+        // Override the glow color for red
+        "--tw-shadow": "0 0 15px rgba(239, 68, 68, 0.2)",
+      } as React.CSSProperties}
     >
       <div className="flex items-start gap-3">
         {/* Warning icon */}
         <svg
-          className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-600"
+          className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-400"
           fill="currentColor"
           viewBox="0 0 20 20"
           aria-hidden="true"
@@ -28,17 +33,17 @@ export default function RiskAlert({ alerts }: RiskAlertProps) {
         </svg>
 
         <div className="flex-1">
-          <h3 className="text-sm font-semibold text-red-800">
+          <h3 className="text-sm font-semibold text-red-300">
             {alerts.length === 1 ? "Risk Alert" : `${alerts.length} Risk Alerts`}
           </h3>
           <ul className="mt-2 space-y-1">
             {alerts.map((alert, index) => (
               <li
                 key={index}
-                className="flex items-start gap-2 text-sm text-red-700"
+                className="flex items-start gap-2 text-sm text-red-400/90"
               >
                 <span
-                  className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-red-400"
+                  className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-red-500"
                   aria-hidden="true"
                 />
                 {alert}

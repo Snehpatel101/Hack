@@ -11,18 +11,18 @@ const PRIORITY_STYLES: Record<
   { badge: string; border: string; label: string }
 > = {
   must_do: {
-    badge: "bg-red-100 text-red-800",
+    badge: "bg-red-500/20 text-red-400",
     border: "border-l-red-500",
     label: "Must Do",
   },
   should_do: {
-    badge: "bg-blue-100 text-blue-800",
-    border: "border-l-blue-500",
+    badge: "bg-orange-500/20 text-orange-400",
+    border: "border-l-orange-500",
     label: "Should Do",
   },
   nice_to_have: {
-    badge: "bg-slate-100 text-slate-600",
-    border: "border-l-slate-400",
+    badge: "bg-gray-700 text-gray-400",
+    border: "border-l-gray-600",
     label: "Nice to Have",
   },
 };
@@ -38,11 +38,11 @@ export default function ActionCard({ action }: ActionCardProps) {
 
   return (
     <article
-      className={`rounded-xl border border-l-4 ${style.border} bg-white p-5 shadow-sm`}
+      className={`rounded-xl border border-gray-700/50 border-l-4 ${style.border} bg-card p-5 shadow-lg shadow-black/20 card-glow transition-all duration-300 animate-slide-up`}
     >
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
-        <h4 className="text-sm font-semibold text-slate-800">
+        <h4 className="text-sm font-semibold text-gray-100">
           {action.action_name}
         </h4>
         <span
@@ -53,18 +53,18 @@ export default function ActionCard({ action }: ActionCardProps) {
       </div>
 
       {/* Why */}
-      <p className="mt-2 text-sm text-slate-600">{action.why}</p>
+      <p className="mt-2 text-sm text-gray-400">{action.why}</p>
 
       {/* How */}
       {howSteps.length > 0 && (
         <div className="mt-3">
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+          <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
             How
           </p>
           <ol className="mt-1.5 space-y-1">
             {howSteps.map((step, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
-                <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-medium text-slate-600">
+              <li key={i} className="flex items-start gap-2 text-sm text-gray-300">
+                <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-orange-500/15 text-xs font-medium text-orange-400">
                   {i + 1}
                 </span>
                 <span>{step}</span>
@@ -76,9 +76,9 @@ export default function ActionCard({ action }: ActionCardProps) {
 
       {/* Estimated Savings */}
       {action.estimated_savings && (
-        <div className="mt-3 flex items-center gap-1.5 rounded-lg bg-emerald-50 px-3 py-2">
+        <div className="mt-3 flex items-center gap-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 px-3 py-2">
           <svg
-            className="h-4 w-4 text-emerald-600"
+            className="h-4 w-4 text-emerald-400"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -91,7 +91,7 @@ export default function ActionCard({ action }: ActionCardProps) {
               d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
             />
           </svg>
-          <span className="text-xs font-medium text-emerald-700">
+          <span className="text-xs font-medium text-emerald-400">
             Estimated savings: {action.estimated_savings}
           </span>
         </div>
