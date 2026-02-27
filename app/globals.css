@@ -13,30 +13,10 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* Animated gradient background */
+/* Static deep navy gradient background */
 .bg-animated-gradient {
-  background: linear-gradient(
-    135deg,
-    #0f172a 0%,
-    #0f2030 25%,
-    #0f172a 50%,
-    #0c1220 75%,
-    #0f172a 100%
-  );
-  background-size: 400% 400%;
-  animation: gradientShift 15s ease infinite;
-}
-
-@keyframes gradientShift {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+  background-attachment: fixed;
 }
 
 /* Glow effect for cards on hover */
@@ -44,9 +24,7 @@ body {
   transition: all 0.3s ease;
 }
 .card-glow:hover {
-  box-shadow: 0 0 15px rgba(20, 184, 166, 0.15),
-    0 0 30px rgba(20, 184, 166, 0.05);
-  border-color: rgba(20, 184, 166, 0.3);
+  box-shadow: 0 0 15px rgba(20, 184, 166, 0.08);
 }
 
 /* Animated border gradient */
@@ -67,6 +45,18 @@ body {
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 /* Scrollbar styling */

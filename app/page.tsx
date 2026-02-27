@@ -6,12 +6,12 @@ import FileUpload from "../components/FileUpload";
 import ProfileForm from "../components/ProfileForm";
 import SnapshotView from "../components/SnapshotView";
 import PlanView from "../components/PlanView";
-import WorkflowTrace from "../components/WorkflowTrace";
 import QUBOVisualization from "../components/QUBOVisualization";
 import RiskAlert from "../components/RiskAlert";
 import ChatBot from "../components/ChatBot";
 import CategoryPieChart from "../components/CategoryPieChart";
 import CollapsibleSection from "../components/CollapsibleSection";
+import EquityCurve from "../components/EquityCurve";
 import type { CopilotResponse } from "../lib/types";
 
 type Stage = "upload" | "profile" | "loading" | "results";
@@ -112,7 +112,7 @@ export default function Home() {
   return (
     <main className="min-h-screen">
       {/* Header */}
-      <header className="bg-gradient-to-r from-slate-900 via-[#0f2030] to-slate-900 border-b border-teal-500/20">
+      <header className="bg-[#0f172a] border-b border-slate-700/30">
         <div className="max-w-5xl mx-auto px-4 py-6">
           <Logo size="lg" />
         </div>
@@ -209,7 +209,7 @@ export default function Home() {
                   <CollapsibleSection
                     title="Risk Alerts"
                     badge={`${result.plan.risk_alerts.length} alert${result.plan.risk_alerts.length !== 1 ? "s" : ""}`}
-                    defaultOpen={true}
+                    defaultOpen={false}
                   >
                     <RiskAlert alerts={result.plan.risk_alerts} />
                   </CollapsibleSection>
@@ -221,7 +221,7 @@ export default function Home() {
               <CollapsibleSection
                 title="Your Action Plan"
                 subtitle="Personalized weekly steps"
-                defaultOpen={true}
+                defaultOpen={false}
               >
                 <PlanView plan={result.plan} />
               </CollapsibleSection>
@@ -232,7 +232,7 @@ export default function Home() {
               <CollapsibleSection
                 title="Financial Details"
                 subtitle="Snapshot & optimization breakdown"
-                defaultOpen={false}
+                defaultOpen={true}
               >
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   <SnapshotView snapshot={result.snapshot} />
@@ -244,13 +244,18 @@ export default function Home() {
               </CollapsibleSection>
             </div>
 
+            {/* Equity Curve — 30-Day Balance Projection */}
+            <div className="animate-slide-up" style={{ animationDelay: "300ms", animationFillMode: "both" }}>
+              <EquityCurve snapshot={result.snapshot} />
+            </div>
+
             {/* Spending Pie Chart */}
             {result.normalizer && result.normalizer.totalSpend > 0 && (
-              <div className="animate-slide-up" style={{ animationDelay: "300ms", animationFillMode: "both" }}>
+              <div className="animate-slide-up" style={{ animationDelay: "400ms", animationFillMode: "both" }}>
                 <CollapsibleSection
                   title="Spending by Category"
                   badge={`${Object.keys(result.normalizer.categoryTotals).length} categories`}
-                  defaultOpen={false}
+                  defaultOpen={true}
                 >
                   <CategoryPieChart
                     categoryTotals={result.normalizer.categoryTotals}
@@ -260,19 +265,8 @@ export default function Home() {
               </div>
             )}
 
-            {/* Workflow Trace */}
-            <div className="animate-slide-up" style={{ animationDelay: "400ms", animationFillMode: "both" }}>
-              <CollapsibleSection
-                title="AI Workflow Trace"
-                subtitle="Pipeline execution details"
-                defaultOpen={false}
-              >
-                <WorkflowTrace trace={result.trace} />
-              </CollapsibleSection>
-            </div>
-
             {/* Reset */}
-            <div className="text-center pt-4 pb-12 animate-fade-in" style={{ animationDelay: "500ms", animationFillMode: "both" }}>
+            <div className="text-center pt-4 pb-12 animate-fade-in" style={{ animationDelay: "600ms", animationFillMode: "both" }}>
               <button
                 onClick={handleReset}
                 className="px-6 py-2.5 bg-gradient-to-r from-teal-500 to-cyan-500 rounded-lg text-white font-medium hover:from-teal-600 hover:to-cyan-600 transition-all duration-300 shadow-lg shadow-teal-500/20 hover:shadow-teal-500/40"

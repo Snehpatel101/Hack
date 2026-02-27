@@ -275,12 +275,17 @@ export function buildSnapshot(payload: UploadPayload): FinancialSnapshot {
   const debts: DebtInfo[] = (payload.debts || []).map((d) => {
     const monthlyRate = d.apr / 100 / 12;
     const monthlyInterest = d.balance * monthlyRate;
-    const payoffMonths =
-      d.minimum_payment > monthlyInterest
-        ? Math.ceil(
-            -Math.log(1 - (d.balance * monthlyRate) / d.minimum_payment) / Math.log(1 + monthlyRate)
-          )
-        : 999;
+    let payoffMonths: number;
+    if (monthlyRate === 0) {
+      // 0% APR: simple division
+      payoffMonths = d.minimum_payment > 0 ? Math.ceil(d.balance / d.minimum_payment) : 999;
+    } else if (d.minimum_payment > monthlyInterest) {
+      payoffMonths = Math.ceil(
+        -Math.log(1 - (d.balance * monthlyRate) / d.minimum_payment) / Math.log(1 + monthlyRate)
+      );
+    } else {
+      payoffMonths = 999;
+    }
     return {
       ...d,
       monthly_interest: Math.round(monthlyInterest * 100) / 100,
@@ -368,8 +373,9 @@ export function buildSnapshot(payload: UploadPayload): FinancialSnapshot {
   const discretionary = totalSpend - essentialSpend - subSpend - debtSpend;
 
   // Normalize to monthly (assume txns cover ~1 month)
+  // Use Math.abs to handle both chronological and reverse-chronological transaction order
   const dateRange = txns.length > 1
-    ? (new Date(txns[txns.length - 1].date).getTime() - new Date(txns[0].date).getTime()) /
+    ? Math.abs(new Date(txns[txns.length - 1].date).getTime() - new Date(txns[0].date).getTime()) /
       (1000 * 60 * 60 * 24)
     : 30;
   const monthFactor = 30 / Math.max(dateRange, 1);
