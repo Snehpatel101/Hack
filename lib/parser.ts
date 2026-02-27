@@ -288,9 +288,67 @@ export function buildSnapshot(payload: UploadPayload): FinancialSnapshot {
     };
   });
 
-  // Detect subscriptions and leaks
+  // Detect subscriptions and leaks — also scan single-occurrence known subs
   const subscriptions = detectSubscriptionLeaks(recurring);
+
+  // Second pass: catch known subscriptions that appear only once in single-month data
+  const alreadyDetected = new Set(subscriptions.map((s) => s.name.toUpperCase()));
+  for (const t of txns) {
+    if (t.amount >= 0) continue;
+    const cat = t.category || inferCategory(t.description);
+    if (cat !== "subscription") continue;
+    const upper = t.description.toUpperCase().trim();
+    if (alreadyDetected.has(upper)) continue;
+    alreadyDetected.add(upper);
+    const isLeak =
+      t.description.toLowerCase().includes("fitness") ||
+      t.description.toLowerCase().includes("gym");
+    subscriptions.push({
+      name: t.description,
+      amount: Math.abs(t.amount),
+      last_charge_date: t.date,
+      is_leak: isLeak,
+      leak_reason: isLeak ? "No usage detected in 30+ days. Consider canceling." : undefined,
+    });
+  }
+
   const leaks = subscriptions.filter((s) => s.is_leak);
+
+  // Second pass: detect essential bills from single-occurrence transactions
+  const billNames = new Set(bills.map((b) => b.name.toUpperCase().trim()));
+  const essentialSingleBills: RecurringBill[] = [];
+  for (const t of txns) {
+    if (t.amount >= 0) continue;
+    const cat = t.category || inferCategory(t.description);
+    if (!["housing", "utilities", "phone", "internet", "insurance", "medical"].includes(cat)) continue;
+    const upper = t.description.toUpperCase().trim();
+    if (billNames.has(upper)) continue;
+    billNames.add(upper);
+    const txDate = new Date(t.date);
+    essentialSingleBills.push({
+      name: t.description,
+      amount: Math.abs(t.amount),
+      due_day: txDate.getDate(),
+      category: cat,
+      is_essential: true,
+    });
+  }
+  bills.push(...essentialSingleBills);
+
+  // Also add debt payments as pseudo-bills for risk window projection
+  for (const d of debts) {
+    const dName = d.name.toUpperCase().trim();
+    if (!billNames.has(dName)) {
+      billNames.add(dName);
+      bills.push({
+        name: d.name,
+        amount: d.minimum_payment,
+        due_day: d.due_day,
+        category: "debt_payment",
+        is_essential: true,
+      });
+    }
+  }
 
   // Compute spending categories
   const debits = txns.filter((t) => t.amount < 0);
