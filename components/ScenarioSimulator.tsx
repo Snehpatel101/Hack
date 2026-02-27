@@ -411,14 +411,75 @@ Thank you,
 // Simulation engine
 // ---------------------------------------------------------------------------
 
+// Categories that should be treated as expenses when all amounts are positive
+const EXPENSE_CATEGORIES = new Set([
+  "housing", "rent", "mortgage",
+  "groceries", "grocery", "food",
+  "dining", "restaurants", "food_and_drink",
+  "shopping", "merchandise",
+  "utilities", "utility",
+  "gas", "gasoline", "fuel",
+  "subscription", "subscriptions",
+  "medical", "healthcare", "health",
+  "insurance",
+  "debt_payment", "loan", "loans", "credit_card",
+  "transportation", "transport", "travel",
+  "entertainment", "recreation",
+  "education",
+  "personal_care", "personal",
+  "clothing", "apparel",
+  "home", "home_improvement",
+  "pets", "pet",
+  "gifts", "donations", "charity",
+  "fees", "bank_fees", "finance_charge",
+  "taxes", "tax",
+  "childcare", "child_care",
+  "phone", "internet", "cable",
+  "uncategorized",
+]);
+
+const INCOME_CATEGORIES = new Set([
+  "income", "salary", "wages", "payroll", "paycheck",
+  "transfer", "transfers", "deposit",
+  "refund", "refunds", "reimbursement",
+  "interest", "dividend", "dividends",
+  "investment", "investments",
+  "freelance", "bonus",
+]);
+
+function inferTransactionSign(t: Transaction): number {
+  const cat = (t.category || "").toLowerCase().replace(/\s+/g, "_");
+
+  // If the category matches a known income category, keep positive
+  if (INCOME_CATEGORIES.has(cat)) {
+    return Math.abs(t.amount);
+  }
+
+  // If the category matches a known expense category, make negative
+  if (EXPENSE_CATEGORIES.has(cat)) {
+    return -Math.abs(t.amount);
+  }
+
+  // Fallback: treat as expense (most transactions are expenses)
+  return -Math.abs(t.amount);
+}
+
 function runSimulation(
   transactions: Transaction[],
   scenario: ScenarioType,
   timeframeDays: Timeframe
 ): SimulationResult {
+  // Safety check: if all amounts are positive (CSV without negative signs),
+  // infer sign from category information
+  const hasNegatives = transactions.some((t) => t.amount < 0);
+  const normalizedTransactions: Transaction[] =
+    !hasNegatives && transactions.length > 0
+      ? transactions.map((t) => ({ ...t, amount: inferTransactionSign(t) }))
+      : transactions;
+
   // 1. Compute baseline financials from transactions
-  const expenses = transactions.filter((t) => t.amount < 0);
-  const incomes = transactions.filter((t) => t.amount > 0);
+  const expenses = normalizedTransactions.filter((t) => t.amount < 0);
+  const incomes = normalizedTransactions.filter((t) => t.amount > 0);
 
   const totalExpense = expenses.reduce((s, t) => s + Math.abs(t.amount), 0);
   const totalIncome = incomes.reduce((s, t) => s + t.amount, 0);
@@ -1290,6 +1351,16 @@ function ResultsView({
           approximate. Everyone&#39;s situation is different &mdash; these are
           practical starting points.
         </p>
+      </div>
+
+      {/* (h) Start Over — prominent bottom button */}
+      <div className="text-center pt-4 pb-8">
+        <button
+          onClick={onBack}
+          className="px-6 py-2.5 bg-gradient-to-r from-teal-500 to-cyan-500 rounded-lg text-white font-medium hover:from-teal-600 hover:to-cyan-600 transition-all duration-300 shadow-lg shadow-teal-500/20 hover:shadow-teal-500/40"
+        >
+          Start Over
+        </button>
       </div>
     </div>
   );

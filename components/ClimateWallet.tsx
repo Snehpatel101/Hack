@@ -161,6 +161,23 @@ const CATEGORY_KEYWORDS: Record<string, string[]> = {
   income: ["payroll", "direct deposit", "salary", "income"],
 };
 
+/** Categories that represent expenses (used for the all-positive-amounts safety check) */
+const EXPENSE_CATEGORIES = new Set([
+  "housing",
+  "groceries",
+  "dining",
+  "shopping",
+  "utilities",
+  "gas/fuel",
+  "subscription",
+  "medical",
+  "insurance",
+  "debt_payment",
+  "transportation",
+  "travel/flights",
+  "other",
+]);
+
 const INSIGHT_BORDER_COLORS = [
   "border-l-teal-500",
   "border-l-blue-500",
@@ -288,14 +305,41 @@ export default function ClimateWallet({
 
   /* ---------- core computation ------------------------------------- */
 
+  /**
+   * Safety check: if ALL amounts are positive (e.g., a bank statement that
+   * lists debits as positive numbers), infer which transactions are expenses
+   * based on their category and negate those amounts so the rest of the
+   * component works correctly.
+   */
+  const normalizedTransactions = useMemo(() => {
+    if (transactions.length === 0) return transactions;
+
+    const hasNegative = transactions.some((tx) => tx.amount < 0);
+    if (hasNegative) {
+      // Amounts already have proper signs — no adjustment needed
+      return transactions;
+    }
+
+    // All amounts are positive. Infer expenses from category keywords.
+    return transactions.map((tx) => {
+      const cat = tx.category || inferCategory(tx.description);
+      if (EXPENSE_CATEGORIES.has(cat)) {
+        // Treat as an expense — negate the amount
+        return { ...tx, amount: -Math.abs(tx.amount) };
+      }
+      // Keep as-is (income, transfer, or unrecognised)
+      return tx;
+    });
+  }, [transactions]);
+
   const expenses = useMemo(
-    () => transactions.filter((tx) => tx.amount < 0),
-    [transactions]
+    () => normalizedTransactions.filter((tx) => tx.amount < 0),
+    [normalizedTransactions]
   );
 
   const incomeTransactions = useMemo(
-    () => transactions.filter((tx) => tx.amount > 0),
-    [transactions]
+    () => normalizedTransactions.filter((tx) => tx.amount > 0),
+    [normalizedTransactions]
   );
 
   const totalSpending = useMemo(
@@ -1248,6 +1292,18 @@ export default function ClimateWallet({
             Climate Wallet provides spending analysis based on your uploaded
             data. This is an educational tool &mdash; not financial advice.
           </p>
+        </div>
+
+        {/* ============================================================ */}
+        {/* Prominent "Start Over" button                                 */}
+        {/* ============================================================ */}
+        <div className="text-center pt-4 pb-8">
+          <button
+            onClick={onBack}
+            className="px-6 py-2.5 bg-gradient-to-r from-teal-500 to-cyan-500 rounded-lg text-white font-medium hover:from-teal-600 hover:to-cyan-600 transition-all duration-300 shadow-lg shadow-teal-500/20 hover:shadow-teal-500/40"
+          >
+            Start Over
+          </button>
         </div>
       </div>
     </div>
