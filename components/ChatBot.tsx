@@ -80,17 +80,31 @@ export default function ChatBot({ context }: ChatBotProps) {
           }),
         });
 
-        const data = await res.json();
+        let replyText = "";
+
+        if (res.ok) {
+          const data = await res.json();
+          replyText = data.reply || "";
+        } else {
+          // Try to extract error message from response body
+          try {
+            const errData = await res.json();
+            console.error("[ChatBot] API error:", res.status, errData.error);
+          } catch {
+            console.error("[ChatBot] API error:", res.status);
+          }
+        }
 
         const botMessage: Message = {
           id: generateId(),
           role: "assistant",
           content:
-            data.reply || "Sorry, I could not process that. Please try again.",
+            replyText || "Sorry, I could not process that. Please try again.",
         };
 
         setMessages((prev) => [...prev, botMessage]);
-      } catch {
+      } catch (err) {
+        console.error("[ChatBot] Network error:", err);
         const errorMessage: Message = {
           id: generateId(),
           role: "assistant",

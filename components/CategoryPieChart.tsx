@@ -327,6 +327,10 @@ export default function CategoryPieChart({
 }: CategoryPieChartProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [isMounted, setIsMounted] = useState(false);
+  const [selectedCategories, setSelectedCategories] = useState<Set<string>>(
+    new Set()
+  );
+  // Empty set means "show all" (default)
 
   useEffect(() => {
     // Small delay to trigger the mount animation after the first paint
@@ -336,9 +340,46 @@ export default function CategoryPieChart({
     return () => cancelAnimationFrame(raf);
   }, []);
 
+  const toggleCategory = (category: string) => {
+    setSelectedCategories((prev) => {
+      const next = new Set(prev);
+      if (next.has(category)) {
+        next.delete(category);
+      } else {
+        next.add(category);
+      }
+      return next;
+    });
+  };
+
+  // All categories sorted by value descending (before any filtering)
+  const allCategories = useMemo(
+    () =>
+      Object.entries(categoryTotals)
+        .filter(([, v]) => v > 0)
+        .sort(([, a], [, b]) => b - a)
+        .map(([k]) => k),
+    [categoryTotals]
+  );
+
+  // Filtered totals based on selected categories
+  const filteredTotals = useMemo(() => {
+    if (selectedCategories.size === 0) return categoryTotals; // show all
+    const filtered: Record<string, number> = {};
+    Array.from(selectedCategories).forEach((cat) => {
+      if (categoryTotals[cat]) filtered[cat] = categoryTotals[cat];
+    });
+    return filtered;
+  }, [categoryTotals, selectedCategories]);
+
+  const filteredTotal = Object.values(filteredTotals).reduce(
+    (s, v) => s + v,
+    0
+  );
+
   const slices = useMemo(
-    () => processCategories(categoryTotals, totalSpend),
-    [categoryTotals, totalSpend]
+    () => processCategories(filteredTotals, filteredTotal),
+    [filteredTotals, filteredTotal]
   );
 
   const isEmpty =
@@ -355,6 +396,35 @@ export default function CategoryPieChart({
     <div className="bg-[#1e293b] rounded-xl shadow-lg shadow-black/20 border border-slate-600/50 p-6 card-glow">
       {/* Title */}
       <h3 className="text-lg font-semibold text-slate-100 mb-4">{title}</h3>
+
+      {/* Category Filters */}
+      {allCategories.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-4">
+          <button
+            onClick={() => setSelectedCategories(new Set())}
+            className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+              selectedCategories.size === 0
+                ? "bg-teal-500/20 text-teal-300 border border-teal-500/40"
+                : "bg-slate-700/50 text-slate-400 border border-slate-600/30 hover:bg-slate-700"
+            }`}
+          >
+            All
+          </button>
+          {allCategories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => toggleCategory(cat)}
+              className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                selectedCategories.has(cat)
+                  ? "bg-teal-500/20 text-teal-300 border border-teal-500/40"
+                  : "bg-slate-700/50 text-slate-400 border border-slate-600/30 hover:bg-slate-700"
+              }`}
+            >
+              {capitalize(cat)}
+            </button>
+          ))}
+        </div>
+      )}
 
       {isEmpty ? (
         /* Empty state */
@@ -468,9 +538,18 @@ export default function CategoryPieChart({
                   Total
                 </span>
                 <span className="text-sm font-semibold text-slate-100">
-                  {formatDollars(totalSpend)}
+                  {formatDollars(
+                    selectedCategories.size > 0 ? filteredTotal : totalSpend
+                  )}
                 </span>
               </div>
+              {selectedCategories.size > 0 && (
+                <div className="text-xs text-slate-500 mt-1">
+                  Showing {selectedCategories.size} of {allCategories.length}{" "}
+                  categories ({formatDollars(filteredTotal)} of{" "}
+                  {formatDollars(totalSpend)})
+                </div>
+              )}
             </div>
           </div>
         </div>

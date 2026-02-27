@@ -12,7 +12,17 @@ import ChatBot from "../components/ChatBot";
 import CategoryPieChart from "../components/CategoryPieChart";
 import CollapsibleSection from "../components/CollapsibleSection";
 import EquityCurve from "../components/EquityCurve";
+import LanguageSelector from "../components/LanguageSelector";
 import type { CopilotResponse } from "../lib/types";
+
+const TRANSLATIONS: Record<string, Record<string, string>> = {
+  en: { getStarted: "Get Started", upload: "Upload your bank transactions (CSV or JSON) and we will analyze your finances to create a personalized action plan.", fewDetails: "A Few Details", generatePlan: "Generate Financial Plan", startOver: "Start Over" },
+  es: { getStarted: "Comenzar", upload: "Sube tus transacciones bancarias (CSV o JSON) y analizaremos tus finanzas para crear un plan de accion personalizado.", fewDetails: "Algunos Detalles", generatePlan: "Generar Plan Financiero", startOver: "Comenzar De Nuevo" },
+  fr: { getStarted: "Commencer", upload: "Telechargez vos transactions bancaires (CSV ou JSON) et nous analyserons vos finances pour creer un plan d'action personnalise.", fewDetails: "Quelques Details", generatePlan: "Generer le Plan Financier", startOver: "Recommencer" },
+  zh: { getStarted: "\u5f00\u59cb", upload: "\u4e0a\u4f20\u60a8\u7684\u94f6\u884c\u4ea4\u6613\u8bb0\u5f55\uff08CSV \u6216 JSON\uff09\uff0c\u6211\u4eec\u5c06\u5206\u6790\u60a8\u7684\u8d22\u52a1\u72b6\u51b5\u5e76\u521b\u5efa\u4e2a\u6027\u5316\u884c\u52a8\u8ba1\u5212\u3002", fewDetails: "\u4e00\u4e9b\u7ec6\u8282", generatePlan: "\u751f\u6210\u8d22\u52a1\u8ba1\u5212", startOver: "\u91cd\u65b0\u5f00\u59cb" },
+  hi: { getStarted: "\u0936\u0941\u0930\u0942 \u0915\u0930\u0947\u0902", upload: "\u0905\u092a\u0928\u0947 \u092c\u0948\u0902\u0915 \u0932\u0947\u0928\u0926\u0947\u0928 (CSV \u092f\u093e JSON) \u0905\u092a\u0932\u094b\u0921 \u0915\u0930\u0947\u0902 \u0914\u0930 \u0939\u092e \u0906\u092a\u0915\u0940 \u0935\u093f\u0924\u094d\u0924\u0940\u092f \u0938\u094d\u0925\u093f\u0924\u093f \u0915\u093e \u0935\u093f\u0936\u094d\u0932\u0947\u0937\u0923 \u0915\u0930\u0947\u0902\u0917\u0947\u0964", fewDetails: "\u0915\u0941\u091b \u0935\u093f\u0935\u0930\u0923", generatePlan: "\u0935\u093f\u0924\u094d\u0924\u0940\u092f \u092f\u094b\u091c\u0928\u093e \u092c\u0928\u093e\u090f\u0902", startOver: "\u092b\u093f\u0930 \u0938\u0947 \u0936\u0941\u0930\u0942 \u0915\u0930\u0947\u0902" },
+  ar: { getStarted: "\u0627\u0628\u062f\u0623", upload: "\u0642\u0645 \u0628\u062a\u062d\u0645\u064a\u0644 \u0645\u0639\u0627\u0645\u0644\u0627\u062a\u0643 \u0627\u0644\u0645\u0635\u0631\u0641\u064a\u0629 (CSV \u0623\u0648 JSON) \u0648\u0633\u0646\u0642\u0648\u0645 \u0628\u062a\u062d\u0644\u064a\u0644 \u0623\u0645\u0648\u0627\u0644\u0643 \u0644\u0625\u0646\u0634\u0627\u0621 \u062e\u0637\u0629 \u0639\u0645\u0644 \u0645\u062e\u0635\u0635\u0629.", fewDetails: "\u0628\u0639\u0636 \u0627\u0644\u062a\u0641\u0627\u0635\u064a\u0644", generatePlan: "\u0625\u0646\u0634\u0627\u0621 \u062e\u0637\u0629 \u0645\u0627\u0644\u064a\u0629", startOver: "\u0627\u0628\u062f\u0623 \u0645\u0646 \u062c\u062f\u064a\u062f" },
+};
 
 type Stage = "upload" | "profile" | "loading" | "results";
 
@@ -24,6 +34,11 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [loadingStep, setLoadingStep] = useState("");
   const [sessionKey, setSessionKey] = useState(0);
+  const [showAbout, setShowAbout] = useState(false);
+  const [showFooterAbout, setShowFooterAbout] = useState(false);
+  const [lang, setLang] = useState("en");
+
+  const t = (key: string) => TRANSLATIONS[lang]?.[key] || TRANSLATIONS.en[key] || key;
 
   const handleFileSelected = useCallback((f: File) => {
     setFile(f);
@@ -113,8 +128,9 @@ export default function Home() {
     <main className="min-h-screen">
       {/* Header */}
       <header className="bg-[#0f172a] border-b border-slate-700/30">
-        <div className="max-w-5xl mx-auto px-4 py-6">
+        <div className="max-w-5xl mx-auto px-4 py-6 flex items-center justify-between">
           <Logo size="lg" />
+          <LanguageSelector currentLang={lang} onLanguageChange={setLang} />
         </div>
       </header>
 
@@ -133,14 +149,43 @@ export default function Home() {
           </div>
         )}
 
+        {/* About dropdown (upload stage only) */}
+        {stage === "upload" && (
+          <div className="max-w-xl mx-auto mb-6">
+            <button
+              onClick={() => setShowAbout(!showAbout)}
+              className="text-sm text-teal-400 hover:text-teal-300 transition-colors flex items-center gap-1"
+            >
+              <svg className={`w-4 h-4 transition-transform ${showAbout ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+              What is Equity Finance Copilot?
+            </button>
+            {showAbout && (
+              <div className="mt-3 bg-[#1e293b] rounded-xl border border-slate-600/50 p-5 text-sm text-slate-300 space-y-3 animate-fade-in">
+                <p><strong className="text-slate-100">Equity Finance Copilot</strong> is an AI-powered financial coaching tool designed for everyone — especially those who are underserved by traditional banking.</p>
+                <p>We help you:</p>
+                <ul className="list-disc list-inside space-y-1 text-slate-400">
+                  <li>Understand your spending patterns and identify savings opportunities</li>
+                  <li>Detect subscription leaks and unnecessary charges</li>
+                  <li>Predict overdraft risks before they happen</li>
+                  <li>Build a personalized weekly action plan for financial stability</li>
+                  <li>Optimize debt payoff using quantum-ready algorithms</li>
+                  <li>Project your balance 90 days into the future</li>
+                </ul>
+                <p className="text-slate-500 text-xs">Built with equity in mind. Educational coaching only — not financial advice.</p>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Stage: Upload */}
         {stage === "upload" && (
           <div className="max-w-xl mx-auto animate-slide-up">
             <div className="bg-[#1e293b] rounded-xl shadow-lg shadow-black/20 border border-slate-600/50 p-8 card-glow">
-              <h2 className="text-xl font-semibold text-slate-100 mb-2">Get Started</h2>
+              <h2 className="text-xl font-semibold text-slate-100 mb-2">{t("getStarted")}</h2>
               <p className="text-slate-400 mb-6 text-sm">
-                Upload your bank transactions (CSV or JSON) and we will analyze
-                your finances to create a personalized action plan.
+                {t("upload")}
               </p>
               <FileUpload
                 key={sessionKey}
@@ -160,7 +205,7 @@ export default function Home() {
         {stage === "profile" && (
           <div className="max-w-xl mx-auto animate-slide-up">
             <div className="bg-[#1e293b] rounded-xl shadow-lg shadow-black/20 border border-slate-600/50 p-8 card-glow">
-              <h2 className="text-xl font-semibold text-slate-100 mb-2">A Few Details</h2>
+              <h2 className="text-xl font-semibold text-slate-100 mb-2">{t("fewDetails")}</h2>
               <p className="text-slate-400 mb-6 text-sm">
                 {isDemoMode
                   ? "Using demo data. Adjust the values below if you like."
@@ -271,7 +316,7 @@ export default function Home() {
                 onClick={handleReset}
                 className="px-6 py-2.5 bg-gradient-to-r from-teal-500 to-cyan-500 rounded-lg text-white font-medium hover:from-teal-600 hover:to-cyan-600 transition-all duration-300 shadow-lg shadow-teal-500/20 hover:shadow-teal-500/40"
               >
-                Start Over
+                {t("startOver")}
               </button>
             </div>
           </div>
@@ -280,10 +325,30 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="border-t border-slate-700/50 bg-[#0a1628] mt-12">
-        <div className="max-w-5xl mx-auto px-4 py-4 text-center text-xs text-slate-500">
-          <span className="text-teal-500/60">Equity Finance Copilot</span>{" "}
-          — Educational coaching only. Not financial advice. Results may vary.
-          Consult a qualified financial advisor for personal decisions.
+        <div className="max-w-5xl mx-auto px-4 py-6 text-center">
+          <div className="text-xs text-slate-500 mb-3">
+            <span className="text-teal-500/60">Equity Finance Copilot</span>{" "}
+            — Educational coaching only. Not financial advice.
+          </div>
+          <button
+            onClick={() => setShowFooterAbout(!showFooterAbout)}
+            className="text-xs text-teal-400/60 hover:text-teal-400 transition-colors"
+          >
+            {showFooterAbout ? "Hide" : "About"} this tool
+          </button>
+          {showFooterAbout && (
+            <div className="mt-3 max-w-lg mx-auto text-left bg-[#1e293b] rounded-lg border border-slate-700/50 p-4 text-xs text-slate-400 space-y-2 animate-fade-in">
+              <p><strong className="text-slate-200">What we provide:</strong></p>
+              <ul className="list-disc list-inside space-y-1">
+                <li>AI-powered financial snapshot and risk analysis</li>
+                <li>Quantum-ready optimization (QUBO) for action planning</li>
+                <li>90-day balance projection with bill/income forecasting</li>
+                <li>Subscription leak detection and debt payoff strategies</li>
+                <li>Personalized weekly coaching plan</li>
+              </ul>
+              <p className="text-slate-500">Your data stays on your device. We do not store or share your financial information. Consult a qualified financial advisor for personal decisions.</p>
+            </div>
+          )}
         </div>
       </footer>
 

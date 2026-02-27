@@ -96,31 +96,40 @@ export default function SnapshotView({ snapshot }: SnapshotViewProps) {
         <h3 className="text-sm font-semibold text-slate-100">
           Monthly Spending Breakdown
         </h3>
-        <div className="mt-4 space-y-3">
-          {spendingCategories.map((cat) => (
-            <div key={cat.label}>
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-medium text-slate-300">{cat.label}</span>
-                <span className="text-slate-500">
-                  {formatCurrency(cat.value)}
-                </span>
-              </div>
-              <div className="mt-1 h-2.5 w-full overflow-hidden rounded-full bg-slate-700">
-                <div
-                  className={`h-full rounded-full ${cat.color} transition-all duration-500`}
-                  style={{
-                    width: `${maxSpending > 0 ? (cat.value / maxSpending) * 100 : 0}%`,
-                  }}
-                  role="meter"
-                  aria-label={`${cat.label}: ${formatCurrency(cat.value)}`}
-                  aria-valuenow={cat.value}
-                  aria-valuemin={0}
-                  aria-valuemax={maxSpending}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
+        {totalSpending === 0 ? (
+          <p className="mt-4 text-xs text-slate-500">
+            No spending data detected. Upload transactions that include expense amounts (negative values) to see your breakdown.
+          </p>
+        ) : (
+          <div className="mt-4 space-y-3">
+            {spendingCategories.map((cat) => {
+              // Ensure non-zero values always show a visible bar (min 2% width)
+              const rawPct = maxSpending > 0 ? (cat.value / maxSpending) * 100 : 0;
+              const displayPct = cat.value > 0 ? Math.max(rawPct, 2) : 0;
+              return (
+                <div key={cat.label}>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-medium text-slate-300">{cat.label}</span>
+                    <span className="text-slate-400 tabular-nums">
+                      {formatCurrency(cat.value)}
+                    </span>
+                  </div>
+                  <div className="mt-1 h-2.5 w-full overflow-hidden rounded-full bg-slate-700">
+                    <div
+                      className={`h-full rounded-full ${cat.color}`}
+                      style={{ width: `${displayPct}%` }}
+                      role="meter"
+                      aria-label={`${cat.label}: ${formatCurrency(cat.value)}`}
+                      aria-valuenow={cat.value}
+                      aria-valuemin={0}
+                      aria-valuemax={maxSpending}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
         <p className="mt-3 text-xs text-slate-500">
           Total: {formatCurrency(totalSpending)} / month
         </p>

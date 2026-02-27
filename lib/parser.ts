@@ -378,7 +378,9 @@ export function buildSnapshot(payload: UploadPayload): FinancialSnapshot {
     ? Math.abs(new Date(txns[txns.length - 1].date).getTime() - new Date(txns[0].date).getTime()) /
       (1000 * 60 * 60 * 24)
     : 30;
-  const monthFactor = 30 / Math.max(dateRange, 1);
+  // Cap monthFactor to avoid extreme inflation when data spans only a few days.
+  // A factor above 4 (data covering ~1 week) would produce unreliable projections.
+  const monthFactor = Math.min(30 / Math.max(dateRange, 1), 4);
 
   const monthlySpending = {
     essentials: Math.round(essentialSpend * monthFactor),
