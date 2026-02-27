@@ -194,6 +194,7 @@ export async function POST(request: NextRequest) {
     // Parse profile (optional)
     let profile: {
       checking_balance?: number;
+      monthly_income?: number;
       income?: RawIncome[];
       debts?: RawDebt[];
       goal?: "stability" | "debt" | "emergency" | "auto";
@@ -208,6 +209,18 @@ export async function POST(request: NextRequest) {
           { status: 422 }
         );
       }
+    }
+
+    // If user provided monthly income but no income schedule, create one
+    if (profile.monthly_income && (!profile.income || profile.income.length === 0)) {
+      const nextPayDate = new Date();
+      nextPayDate.setDate(nextPayDate.getDate() + 14); // Assume next pay in ~2 weeks
+      profile.income = [{
+        source: "Monthly Income",
+        amount: profile.monthly_income / 2, // Assume biweekly pay
+        frequency: "biweekly" as const,
+        next_date: nextPayDate.toISOString().split("T")[0],
+      }];
     }
 
     traceSteps.push({

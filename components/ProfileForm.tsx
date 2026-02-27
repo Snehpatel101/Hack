@@ -3,7 +3,7 @@
 import { FormEvent, useState } from "react";
 
 interface ProfileFormProps {
-  onSubmit: (profile: { checking_balance: number; goal: string }) => void;
+  onSubmit: (profile: { checking_balance: number; goal: string; monthly_income?: number }) => void;
   defaultBalance?: number;
 }
 
@@ -38,12 +38,14 @@ export default function ProfileForm({
     defaultBalance !== undefined ? String(defaultBalance) : ""
   );
   const [goal, setGoal] = useState<string>("auto");
+  const [income, setIncome] = useState<string>("");
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     const parsed = parseFloat(balance);
     if (isNaN(parsed) || parsed < 0) return;
-    onSubmit({ checking_balance: parsed, goal });
+    const incomeVal = parseFloat(income);
+    onSubmit({ checking_balance: parsed, goal, monthly_income: incomeVal > 0 ? incomeVal : undefined });
   };
 
   const isValid = balance !== "" && !isNaN(parseFloat(balance)) && parseFloat(balance) >= 0;
@@ -75,6 +77,32 @@ export default function ProfileForm({
             onChange={(e) => setBalance(e.target.value)}
             placeholder="0.00"
             required
+            className="block w-full rounded-lg border border-slate-600/50 bg-[#1e293b] py-2.5 pl-7 pr-4 text-sm text-slate-100 placeholder-slate-600 shadow-lg shadow-black/20 transition-all duration-300 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+          />
+        </div>
+      </div>
+
+      {/* Monthly Income */}
+      <div>
+        <label htmlFor="monthly_income" className="block text-sm font-medium text-slate-100">
+          Monthly Take-Home Pay
+        </label>
+        <p className="mt-1 text-xs text-slate-500">
+          Your total monthly income after taxes (approximate is fine).
+        </p>
+        <div className="relative mt-2">
+          <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
+            $
+          </span>
+          <input
+            id="monthly_income"
+            name="monthly_income"
+            type="number"
+            step="1"
+            min="0"
+            value={income}
+            onChange={(e) => setIncome(e.target.value)}
+            placeholder="0"
             className="block w-full rounded-lg border border-slate-600/50 bg-[#1e293b] py-2.5 pl-7 pr-4 text-sm text-slate-100 placeholder-slate-600 shadow-lg shadow-black/20 transition-all duration-300 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
           />
         </div>

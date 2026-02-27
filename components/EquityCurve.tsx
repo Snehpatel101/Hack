@@ -70,7 +70,7 @@ function incomeHitsOnDate(income: RawIncome, targetDate: Date): boolean {
 }
 
 /**
- * Project the checking account balance forward 30 days.
+ * Project the checking account balance forward 90 days.
  */
 function projectBalance(snapshot: FinancialSnapshot): DataPoint[] {
   const today = new Date();
@@ -79,7 +79,7 @@ function projectBalance(snapshot: FinancialSnapshot): DataPoint[] {
   const points: DataPoint[] = [];
   let runningBalance = snapshot.checking_balance;
 
-  for (let day = 0; day <= 30; day++) {
+  for (let day = 0; day <= 90; day++) {
     const currentDate = addDays(today, day);
     const dayOfMonth = currentDate.getDate();
     const events: string[] = [];
@@ -122,7 +122,7 @@ const CHART_HEIGHT = SVG_HEIGHT - PADDING.top - PADDING.bottom;
 // ---- Coordinate Mapping ----
 
 function dataX(day: number): number {
-  return PADDING.left + (day / 30) * CHART_WIDTH;
+  return PADDING.left + (day / 90) * CHART_WIDTH;
 }
 
 function dataY(balance: number, minY: number, maxY: number): number {
@@ -283,7 +283,7 @@ function riskWindowDayOffsets(
     if (isNaN(rwDate.getTime())) continue;
     const diffMs = rwDate.getTime() - today.getTime();
     const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
-    if (diffDays >= 0 && diffDays <= 30) {
+    if (diffDays >= 0 && diffDays <= 90) {
       results.push({ day: diffDays, risk: rw });
     }
   }
@@ -325,7 +325,7 @@ export default function EquityCurve({ snapshot }: EquityCurveProps) {
 
   // X axis ticks
   const xTicks = useMemo(() => {
-    const ticks = [0, 5, 10, 15, 20, 25, 30];
+    const ticks = [0, 15, 30, 45, 60, 75, 90];
     return ticks;
   }, []);
 
@@ -402,8 +402,8 @@ export default function EquityCurve({ snapshot }: EquityCurveProps) {
     const x = dataX(p.day);
     const y = dataY(p.balance, minY, maxY);
     let anchor: "left" | "right" | "center" = "center";
-    if (p.day <= 3) anchor = "left";
-    else if (p.day >= 27) anchor = "right";
+    if (p.day <= 5) anchor = "left";
+    else if (p.day >= 85) anchor = "right";
     return { x, y, anchor };
   };
 
@@ -411,7 +411,7 @@ export default function EquityCurve({ snapshot }: EquityCurveProps) {
     <div className="bg-[#1e293b] rounded-xl shadow-lg shadow-black/20 border border-slate-600/50 p-6 card-glow">
       {/* Title */}
       <h3 className="text-lg font-semibold text-slate-100 mb-4">
-        30-Day Balance Projection
+        90-Day Balance Projection
       </h3>
 
       {/* SVG Chart */}
@@ -420,7 +420,7 @@ export default function EquityCurve({ snapshot }: EquityCurveProps) {
           viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}
           className="w-full h-full"
           role="img"
-          aria-label="30-day balance projection chart showing projected checking account balance over the next 30 days"
+          aria-label="90-day balance projection chart showing projected checking account balance over the next 90 days"
         >
           <defs>
             {/* Area gradient */}
@@ -497,7 +497,7 @@ export default function EquityCurve({ snapshot }: EquityCurveProps) {
           {/* Risk window bands */}
           {riskMarkers.map(({ day }, i) => {
             const x = dataX(day);
-            const bandWidth = Math.max(CHART_WIDTH / 30, 8);
+            const bandWidth = Math.max(CHART_WIDTH / 90, 8);
             return (
               <g key={`risk-band-${i}`}>
                 <rect
@@ -630,7 +630,9 @@ export default function EquityCurve({ snapshot }: EquityCurveProps) {
             const x = dataX(day);
             let label: string;
             if (day === 0) label = "Today";
-            else if (day === 30) label = "Day 30";
+            else if (day === 30) label = "Month 1";
+            else if (day === 60) label = "Month 2";
+            else if (day === 90) label = "Month 3";
             else label = `Day ${day}`;
             return (
               <text

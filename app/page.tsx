@@ -38,7 +38,7 @@ export default function Home() {
   }, []);
 
   const handleProfileSubmit = useCallback(
-    async (profile: { checking_balance: number; goal: string }) => {
+    async (profile: { checking_balance: number; goal: string; monthly_income?: number }) => {
       setStage("loading");
       setError(null);
       setLoadingStep("Uploading and parsing your data...");
