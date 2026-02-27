@@ -16,13 +16,13 @@ const PRIORITY_STYLES: Record<
     label: "Must Do",
   },
   should_do: {
-    badge: "bg-orange-500/20 text-orange-400",
-    border: "border-l-orange-500",
+    badge: "bg-teal-500/20 text-teal-400",
+    border: "border-l-teal-500",
     label: "Should Do",
   },
   nice_to_have: {
-    badge: "bg-gray-700 text-gray-400",
-    border: "border-l-gray-600",
+    badge: "bg-slate-700 text-slate-400",
+    border: "border-l-slate-600",
     label: "Nice to Have",
   },
 };
@@ -38,11 +38,11 @@ export default function ActionCard({ action }: ActionCardProps) {
 
   return (
     <article
-      className={`rounded-xl border border-gray-700/50 border-l-4 ${style.border} bg-card p-5 shadow-lg shadow-black/20 card-glow transition-all duration-300 animate-slide-up`}
+      className={`rounded-xl border border-slate-600/50 border-l-4 ${style.border} bg-[#1e293b] p-5 shadow-lg shadow-black/20 card-glow transition-all duration-300 animate-slide-up`}
     >
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
-        <h4 className="text-sm font-semibold text-gray-100">
+        <h4 className="text-sm font-semibold text-slate-100">
           {action.action_name}
         </h4>
         <span
@@ -53,18 +53,18 @@ export default function ActionCard({ action }: ActionCardProps) {
       </div>
 
       {/* Why */}
-      <p className="mt-2 text-sm text-gray-400">{action.why}</p>
+      <p className="mt-2 text-sm text-slate-400">{action.why}</p>
 
       {/* How */}
       {howSteps.length > 0 && (
         <div className="mt-3">
-          <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
             How
           </p>
           <ol className="mt-1.5 space-y-1">
             {howSteps.map((step, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm text-gray-300">
-                <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-orange-500/15 text-xs font-medium text-orange-400">
+              <li key={i} className="flex items-start gap-2 text-sm text-slate-300">
+                <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-teal-500/15 text-xs font-medium text-teal-400">
                   {i + 1}
                 </span>
                 <span>{step}</span>

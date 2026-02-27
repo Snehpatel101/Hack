@@ -23,32 +23,32 @@ export default function QUBOVisualization({
   const rejectedActions = allActions.filter((a) => !selectedIds.has(a.id));
 
   return (
-    <div className="rounded-xl bg-card border border-gray-700/50 p-6 shadow-lg shadow-black/20 card-glow transition-all duration-300 animate-fade-in">
-      <h3 className="text-sm font-semibold text-gray-100">
+    <div className="rounded-xl bg-[#1e293b] border border-slate-600/50 p-6 shadow-lg shadow-black/20 card-glow transition-all duration-300 animate-fade-in">
+      <h3 className="text-sm font-semibold text-slate-100">
         QUBO Optimization Results
       </h3>
-      <p className="mt-1 text-xs text-gray-500">
+      <p className="mt-1 text-xs text-slate-500">
         Actions selected by the quantum-inspired optimizer to maximize impact
         within your constraints.
       </p>
 
       {/* Solver Stats */}
       <div className="mt-4 grid grid-cols-3 gap-3">
-        <div className="rounded-lg bg-[#1a1a1a] border border-gray-700/50 px-3 py-2 text-center">
-          <p className="text-xs text-gray-500">Solver</p>
-          <p className="mt-0.5 text-sm font-medium text-gray-200">
+        <div className="rounded-lg bg-[#1e293b] border border-slate-600/50 px-3 py-2 text-center">
+          <p className="text-xs text-slate-500">Solver</p>
+          <p className="mt-0.5 text-sm font-medium text-slate-200">
             {SOLVER_LABELS[quboResult.solver_used]}
           </p>
         </div>
-        <div className="rounded-lg bg-[#1a1a1a] border border-gray-700/50 px-3 py-2 text-center">
-          <p className="text-xs text-gray-500">Objective Value</p>
-          <p className="mt-0.5 text-sm font-medium text-orange-400">
+        <div className="rounded-lg bg-[#1e293b] border border-slate-600/50 px-3 py-2 text-center">
+          <p className="text-xs text-slate-500">Objective Value</p>
+          <p className="mt-0.5 text-sm font-medium text-teal-400">
             {quboResult.objective_value.toFixed(2)}
           </p>
         </div>
-        <div className="rounded-lg bg-[#1a1a1a] border border-gray-700/50 px-3 py-2 text-center">
-          <p className="text-xs text-gray-500">Iterations</p>
-          <p className="mt-0.5 text-sm font-medium text-gray-200">
+        <div className="rounded-lg bg-[#1e293b] border border-slate-600/50 px-3 py-2 text-center">
+          <p className="text-xs text-slate-500">Iterations</p>
+          <p className="mt-0.5 text-sm font-medium text-slate-200">
             {quboResult.iterations !== undefined
               ? quboResult.iterations.toLocaleString()
               : "N/A"}
@@ -58,7 +58,7 @@ export default function QUBOVisualization({
 
       {/* Selected Actions */}
       <div className="mt-5">
-        <p className="text-xs font-medium uppercase tracking-wide text-orange-400">
+        <p className="text-xs font-medium uppercase tracking-wide text-teal-400">
           Selected ({selectedActions.length})
         </p>
         <div className="mt-2 flex flex-wrap gap-2">
@@ -67,7 +67,7 @@ export default function QUBOVisualization({
               <ActionChip key={action.id} action={action} selected />
             ))
           ) : (
-            <p className="text-xs text-gray-600">No actions selected</p>
+            <p className="text-xs text-slate-600">No actions selected</p>
           )}
         </div>
       </div>
@@ -75,7 +75,7 @@ export default function QUBOVisualization({
       {/* Rejected Actions */}
       {rejectedActions.length > 0 && (
         <div className="mt-4">
-          <p className="text-xs font-medium uppercase tracking-wide text-gray-500">
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
             Not Selected ({rejectedActions.length})
           </p>
           <div className="mt-2 flex flex-wrap gap-2">
@@ -105,15 +105,15 @@ function ActionChip({
         text-xs font-medium transition-all duration-300
         ${
           selected
-            ? "bg-orange-500/15 text-orange-300 border border-orange-500/30"
-            : "bg-gray-800 text-gray-500 border border-gray-700/50"
+            ? "bg-teal-500/15 text-teal-300 border border-teal-500/30"
+            : "bg-slate-700 text-slate-500 border border-slate-600/50"
         }
       `}
     >
       {/* Status indicator */}
       <span
         className={`h-2 w-2 rounded-full ${
-          selected ? "bg-orange-500" : "bg-gray-600"
+          selected ? "bg-teal-500" : "bg-slate-600"
         }`}
         aria-hidden="true"
       />
@@ -122,7 +122,7 @@ function ActionChip({
 
       {/* Tooltip-style detail on hover */}
       <div
-        className="pointer-events-none absolute -top-10 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-md bg-gray-900 border border-gray-700 px-2.5 py-1 text-xs text-gray-200 opacity-0 shadow-lg transition-opacity group-hover:opacity-100"
+        className="pointer-events-none absolute -top-10 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-md bg-slate-900 border border-slate-700 px-2.5 py-1 text-xs text-slate-200 opacity-0 shadow-lg transition-opacity group-hover:opacity-100"
         role="tooltip"
       >
         ${low}&ndash;${high}/mo | Risk: -{action.risk_reduction}

@@ -16,17 +16,17 @@ export default function Logo({ size = "md", showTagline = true }: LogoProps) {
   return (
     <div className="flex flex-col items-start select-none">
       <div className={`${s.main} font-extrabold tracking-tight leading-tight`}>
-        <span className="text-orange-500">ONE DAY</span>
+        <span className="text-teal-400">ONE DAY</span>
         <span
-          className={`${s.or} ${s.gap} text-gray-400 font-light italic animate-pulse-subtle`}
+          className={`${s.or} ${s.gap} text-slate-400 font-light italic animate-pulse-subtle`}
         >
           or
         </span>
-        <span className="text-amber-400">DAY ONE</span>
+        <span className="text-cyan-400">DAY ONE</span>
       </div>
       {showTagline && (
         <p
-          className={`${s.sub} uppercase tracking-[0.25em] text-gray-500 mt-1 font-medium`}
+          className={`${s.sub} uppercase tracking-[0.25em] text-slate-500 mt-1 font-medium`}
         >
           Equity Finance Copilot
         </p>

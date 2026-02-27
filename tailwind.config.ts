@@ -9,12 +9,12 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        background: "#0a0a0a",
-        foreground: "#f5f5f5",
-        card: "#141414",
-        "card-hover": "#1a1a1a",
-        accent: { DEFAULT: "#f97316", light: "#fb923c", dark: "#ea580c" },
-        warm: { DEFAULT: "#f59e0b", light: "#fbbf24", dark: "#d97706" },
+        background: "#0f172a",
+        foreground: "#f1f5f9",
+        card: "#1e293b",
+        "card-hover": "#334155",
+        accent: { DEFAULT: "#14b8a6", light: "#2dd4bf", dark: "#0d9488" },
+        warm: { DEFAULT: "#0ea5e9", light: "#22d3ee", dark: "#0284c7" },
       },
       animation: {
         "fade-in": "fadeIn 0.5s ease-out",
@@ -35,8 +35,8 @@ const config: Config = {
           "100%": { opacity: "1", transform: "translateX(0)" },
         },
         pulseGlow: {
-          "0%, 100%": { boxShadow: "0 0 5px rgba(249,115,22,0.3)" },
-          "50%": { boxShadow: "0 0 20px rgba(249,115,22,0.6)" },
+          "0%, 100%": { boxShadow: "0 0 5px rgba(20,184,166,0.3)" },
+          "50%": { boxShadow: "0 0 20px rgba(20,184,166,0.6)" },
         },
         gradientX: {
           "0%, 100%": { backgroundPosition: "0% 50%" },

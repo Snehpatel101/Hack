@@ -90,15 +90,15 @@ export default function FileUpload({
           transition-all duration-300 cursor-pointer
           ${
             dragActive
-              ? "border-orange-500 bg-orange-500/10"
-              : "border-gray-600 bg-card-hover hover:border-orange-400 hover:bg-orange-500/5"
+              ? "border-teal-500 bg-teal-500/10"
+              : "border-slate-600 bg-card-hover hover:border-teal-400 hover:bg-teal-500/5"
           }
           ${isLoading ? "pointer-events-none opacity-60" : ""}
         `}
       >
         {/* Upload icon */}
         <svg
-          className="mb-3 h-10 w-10 text-gray-500"
+          className="mb-3 h-10 w-10 text-slate-500"
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -112,11 +112,11 @@ export default function FileUpload({
           />
         </svg>
 
-        <p className="text-sm font-medium text-gray-300">
+        <p className="text-sm font-medium text-slate-300">
           Drag and drop your file here, or{" "}
-          <span className="text-orange-400 underline">browse</span>
+          <span className="text-teal-400 underline">browse</span>
         </p>
-        <p className="mt-1 text-xs text-gray-500">
+        <p className="mt-1 text-xs text-slate-500">
           Supports CSV and JSON files
         </p>
 
@@ -133,9 +133,9 @@ export default function FileUpload({
 
       {/* Selected file info */}
       {selectedFile && (
-        <div className="flex items-center gap-3 rounded-lg bg-orange-500/10 border border-orange-500/20 px-4 py-3 animate-slide-up">
+        <div className="flex items-center gap-3 rounded-lg bg-teal-500/10 border border-teal-500/20 px-4 py-3 animate-slide-up">
           <svg
-            className="h-5 w-5 flex-shrink-0 text-orange-400"
+            className="h-5 w-5 flex-shrink-0 text-teal-400"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -149,10 +149,10 @@ export default function FileUpload({
             />
           </svg>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium text-gray-100">
+            <p className="truncate text-sm font-medium text-slate-100">
               {selectedFile.name}
             </p>
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-slate-500">
               {formatSize(selectedFile.size)}
             </p>
           </div>
@@ -165,10 +165,10 @@ export default function FileUpload({
       {/* Divider */}
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-gray-700/50" />
+          <div className="w-full border-t border-slate-700/50" />
         </div>
         <div className="relative flex justify-center text-xs">
-          <span className="bg-card px-3 text-gray-500">or</span>
+          <span className="bg-[#1e293b] px-3 text-slate-500">or</span>
         </div>
       </div>
 
@@ -178,11 +178,11 @@ export default function FileUpload({
         onClick={onDemoLoad}
         disabled={isLoading}
         className={`
-          w-full rounded-lg border border-orange-500/30 bg-orange-500/10 px-4 py-3
-          text-sm font-medium text-orange-400
+          w-full rounded-lg border border-teal-500/30 bg-teal-500/10 px-4 py-3
+          text-sm font-medium text-teal-400
           transition-all duration-300
-          hover:bg-orange-500/20 hover:border-orange-500/50
-          focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-[#0a0a0a]
+          hover:bg-teal-500/20 hover:border-teal-500/50
+          focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 focus:ring-offset-[#0f172a]
           disabled:cursor-not-allowed disabled:opacity-50
         `}
       >

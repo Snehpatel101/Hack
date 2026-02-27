@@ -130,7 +130,7 @@ export default function ChatBot({ context }: ChatBotProps) {
       const rendered = parts.map((part, j) => {
         if (part.startsWith("**") && part.endsWith("**")) {
           return (
-            <strong key={j} className="font-semibold text-gray-100">
+            <strong key={j} className="font-semibold text-slate-100">
               {part.slice(2, -2)}
             </strong>
           );
@@ -152,9 +152,9 @@ export default function ChatBot({ context }: ChatBotProps) {
       {/* Floating toggle button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-offset-2 focus:ring-offset-[#0a0a0a]"
+        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:ring-offset-2 focus:ring-offset-[#0f172a]"
         style={{
-          background: "linear-gradient(135deg, #f97316 0%, #ea580c 100%)",
+          background: "linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)",
         }}
         aria-label={isOpen ? "Close chat" : "Open chat"}
       >
@@ -200,24 +200,24 @@ export default function ChatBot({ context }: ChatBotProps) {
         }`}
         style={{ height: "500px" }}
       >
-        <div className="flex flex-col h-full rounded-2xl shadow-2xl border border-gray-800 overflow-hidden bg-[#141414]">
+        <div className="flex flex-col h-full rounded-2xl shadow-2xl border border-slate-700 overflow-hidden bg-[#1e293b]">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 bg-[#141414] border-b border-gray-800">
+          <div className="flex items-center justify-between px-4 py-3 bg-[#1e293b] border-b border-slate-700">
             <div className="flex items-center gap-3">
               <div
                 className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-bold"
                 style={{
                   background:
-                    "linear-gradient(135deg, #f97316 0%, #ea580c 100%)",
+                    "linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)",
                 }}
               >
                 AI
               </div>
               <div>
-                <h3 className="text-gray-100 font-semibold text-sm leading-tight">
+                <h3 className="text-slate-100 font-semibold text-sm leading-tight">
                   Ask Copilot
                 </h3>
-                <span className="inline-flex items-center gap-1 text-[10px] text-gray-500 font-medium">
+                <span className="inline-flex items-center gap-1 text-[10px] text-slate-500 font-medium">
                   <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" />
                   powered by watsonx.ai
                 </span>
@@ -225,7 +225,7 @@ export default function ChatBot({ context }: ChatBotProps) {
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="text-gray-500 hover:text-gray-300 transition-colors p-1 rounded-lg hover:bg-gray-800"
+              className="text-slate-500 hover:text-slate-300 transition-colors p-1 rounded-lg hover:bg-slate-700"
               aria-label="Close chat"
             >
               <svg
@@ -246,7 +246,7 @@ export default function ChatBot({ context }: ChatBotProps) {
           </div>
 
           {/* Messages area */}
-          <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 bg-[#0a0a0a]">
+          <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 bg-[#0f172a]">
             {/* Welcome message */}
             {messages.length === 0 && !isLoading && (
               <div className="space-y-4 animate-fadeIn">
@@ -255,12 +255,12 @@ export default function ChatBot({ context }: ChatBotProps) {
                     className="w-6 h-6 rounded-md flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0 mt-0.5"
                     style={{
                       background:
-                        "linear-gradient(135deg, #f97316 0%, #ea580c 100%)",
+                        "linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)",
                     }}
                   >
                     AI
                   </div>
-                  <div className="bg-[#1e1e1e] text-gray-300 rounded-2xl rounded-tl-md px-3.5 py-2.5 text-sm leading-relaxed max-w-[85%]">
+                  <div className="bg-[#334155] text-slate-300 rounded-2xl rounded-tl-md px-3.5 py-2.5 text-sm leading-relaxed max-w-[85%]">
                     Hi! I am your financial copilot. I can help you understand
                     your plan, explain risks, and answer questions about your
                     finances. What would you like to know?
@@ -273,7 +273,7 @@ export default function ChatBot({ context }: ChatBotProps) {
                     <button
                       key={chip}
                       onClick={() => handleChipClick(chip)}
-                      className="text-xs px-3 py-1.5 rounded-full border border-gray-700 text-gray-400 hover:text-orange-400 hover:border-orange-500/50 hover:bg-orange-500/10 transition-all duration-200"
+                      className="text-xs px-3 py-1.5 rounded-full border border-teal-500/30 text-teal-400 hover:text-teal-300 hover:border-teal-500/50 hover:bg-teal-500/10 transition-all duration-200"
                     >
                       {chip}
                     </button>
@@ -296,7 +296,7 @@ export default function ChatBot({ context }: ChatBotProps) {
                     className="w-6 h-6 rounded-md flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0 mt-0.5"
                     style={{
                       background:
-                        "linear-gradient(135deg, #f97316 0%, #ea580c 100%)",
+                        "linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)",
                     }}
                   >
                     AI
@@ -305,8 +305,8 @@ export default function ChatBot({ context }: ChatBotProps) {
                 <div
                   className={`rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed max-w-[85%] ${
                     msg.role === "user"
-                      ? "bg-gradient-to-br from-orange-500 to-orange-600 text-white rounded-tr-md"
-                      : "bg-[#1e1e1e] text-gray-300 rounded-tl-md"
+                      ? "bg-gradient-to-br from-teal-500 to-teal-600 text-white rounded-tr-md"
+                      : "bg-[#334155] text-slate-300 rounded-tl-md"
                   }`}
                 >
                   {msg.role === "assistant"
@@ -323,16 +323,16 @@ export default function ChatBot({ context }: ChatBotProps) {
                   className="w-6 h-6 rounded-md flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0 mt-0.5"
                   style={{
                     background:
-                      "linear-gradient(135deg, #f97316 0%, #ea580c 100%)",
+                      "linear-gradient(135deg, #14b8a6 0%, #0d9488 100%)",
                   }}
                 >
                   AI
                 </div>
-                <div className="bg-[#1e1e1e] text-gray-400 rounded-2xl rounded-tl-md px-4 py-3">
+                <div className="bg-[#334155] text-slate-400 rounded-2xl rounded-tl-md px-4 py-3">
                   <div className="flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                    <span className="w-1.5 h-1.5 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                    <span className="w-1.5 h-1.5 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                    <span className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                    <span className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                    <span className="w-1.5 h-1.5 bg-slate-500 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
                   </div>
                 </div>
               </div>
@@ -344,9 +344,9 @@ export default function ChatBot({ context }: ChatBotProps) {
           {/* Input area */}
           <form
             onSubmit={handleSubmit}
-            className="px-3 py-3 border-t border-gray-800 bg-[#141414]"
+            className="px-3 py-3 border-t border-slate-700 bg-[#1e293b]"
           >
-            <div className="flex items-center gap-2 bg-[#0a0a0a] rounded-xl border border-gray-800 focus-within:border-orange-500/50 transition-colors px-3 py-1">
+            <div className="flex items-center gap-2 bg-[#0f172a] rounded-xl border border-slate-700 focus-within:border-teal-500/50 transition-colors px-3 py-1">
               <input
                 ref={inputRef}
                 type="text"
@@ -355,12 +355,12 @@ export default function ChatBot({ context }: ChatBotProps) {
                 onKeyDown={handleKeyDown}
                 placeholder="Ask about your finances..."
                 disabled={isLoading}
-                className="flex-1 bg-transparent text-gray-100 placeholder-gray-600 text-sm py-2 focus:outline-none disabled:opacity-50"
+                className="flex-1 bg-transparent text-slate-100 placeholder-slate-600 text-sm py-2 focus:outline-none disabled:opacity-50"
               />
               <button
                 type="submit"
                 disabled={!input.trim() || isLoading}
-                className="p-1.5 rounded-lg text-gray-500 hover:text-orange-400 disabled:opacity-30 disabled:hover:text-gray-500 transition-colors"
+                className="p-1.5 rounded-lg text-slate-500 hover:text-teal-400 disabled:opacity-30 disabled:hover:text-slate-500 transition-colors"
                 aria-label="Send message"
               >
                 <svg

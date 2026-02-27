@@ -11,6 +11,7 @@ import QUBOVisualization from "../components/QUBOVisualization";
 import RiskAlert from "../components/RiskAlert";
 import ChatBot from "../components/ChatBot";
 import CategoryPieChart from "../components/CategoryPieChart";
+import CollapsibleSection from "../components/CollapsibleSection";
 import type { CopilotResponse } from "../lib/types";
 
 type Stage = "upload" | "profile" | "loading" | "results";
@@ -22,6 +23,7 @@ export default function Home() {
   const [result, setResult] = useState<CopilotResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loadingStep, setLoadingStep] = useState("");
+  const [sessionKey, setSessionKey] = useState(0);
 
   const handleFileSelected = useCallback((f: File) => {
     setFile(f);
@@ -104,12 +106,13 @@ export default function Home() {
     setIsDemoMode(false);
     setResult(null);
     setError(null);
+    setSessionKey((k) => k + 1);
   }, []);
 
   return (
     <main className="min-h-screen">
       {/* Header */}
-      <header className="bg-gradient-to-r from-gray-900 via-[#1a1207] to-gray-900 border-b border-orange-500/20">
+      <header className="bg-gradient-to-r from-slate-900 via-[#0f2030] to-slate-900 border-b border-teal-500/20">
         <div className="max-w-5xl mx-auto px-4 py-6">
           <Logo size="lg" />
         </div>
@@ -133,19 +136,20 @@ export default function Home() {
         {/* Stage: Upload */}
         {stage === "upload" && (
           <div className="max-w-xl mx-auto animate-slide-up">
-            <div className="bg-card rounded-xl shadow-lg shadow-black/20 border border-gray-700/50 p-8 card-glow">
-              <h2 className="text-xl font-semibold text-gray-100 mb-2">Get Started</h2>
-              <p className="text-gray-400 mb-6 text-sm">
+            <div className="bg-[#1e293b] rounded-xl shadow-lg shadow-black/20 border border-slate-600/50 p-8 card-glow">
+              <h2 className="text-xl font-semibold text-slate-100 mb-2">Get Started</h2>
+              <p className="text-slate-400 mb-6 text-sm">
                 Upload your bank transactions (CSV or JSON) and we will analyze
                 your finances to create a personalized action plan.
               </p>
               <FileUpload
+                key={sessionKey}
                 onFileSelected={handleFileSelected}
                 onDemoLoad={handleDemoLoad}
                 isLoading={false}
               />
             </div>
-            <p className="text-center text-xs text-gray-500 mt-4">
+            <p className="text-center text-xs text-slate-500 mt-4">
               Your data stays on this device. We do not store or share your
               financial information.
             </p>
@@ -155,14 +159,15 @@ export default function Home() {
         {/* Stage: Profile */}
         {stage === "profile" && (
           <div className="max-w-xl mx-auto animate-slide-up">
-            <div className="bg-card rounded-xl shadow-lg shadow-black/20 border border-gray-700/50 p-8 card-glow">
-              <h2 className="text-xl font-semibold text-gray-100 mb-2">A Few Details</h2>
-              <p className="text-gray-400 mb-6 text-sm">
+            <div className="bg-[#1e293b] rounded-xl shadow-lg shadow-black/20 border border-slate-600/50 p-8 card-glow">
+              <h2 className="text-xl font-semibold text-slate-100 mb-2">A Few Details</h2>
+              <p className="text-slate-400 mb-6 text-sm">
                 {isDemoMode
                   ? "Using demo data. Adjust the values below if you like."
                   : `File selected: ${file?.name}. Now tell us a bit more.`}
               </p>
               <ProfileForm
+                key={sessionKey}
                 onSubmit={handleProfileSubmit}
                 defaultBalance={isDemoMode ? 340 : undefined}
               />
@@ -172,7 +177,7 @@ export default function Home() {
                   setIsDemoMode(false);
                   setFile(null);
                 }}
-                className="mt-4 text-sm text-gray-500 underline hover:text-orange-400 transition-colors"
+                className="mt-4 text-sm text-slate-500 underline hover:text-teal-400 transition-colors"
               >
                 Go back
               </button>
@@ -183,11 +188,11 @@ export default function Home() {
         {/* Stage: Loading */}
         {stage === "loading" && (
           <div className="max-w-xl mx-auto text-center py-20 animate-fade-in">
-            <div className="inline-block animate-spin rounded-full h-10 w-10 border-4 border-orange-500/20 border-t-orange-500 mb-4" />
-            <p className="text-lg font-medium text-gray-200">
+            <div className="inline-block animate-spin rounded-full h-10 w-10 border-4 border-teal-500/20 border-t-teal-500 mb-4" />
+            <p className="text-lg font-medium text-slate-200">
               {loadingStep}
             </p>
-            <p className="text-sm text-gray-500 mt-2">
+            <p className="text-sm text-slate-500 mt-2">
               Our AI agent is analyzing your data, finding risks, and
               optimizing your plan...
             </p>
@@ -196,49 +201,81 @@ export default function Home() {
 
         {/* Stage: Results */}
         {stage === "results" && result && (
-          <div className="space-y-6">
-            {/* Risk alerts */}
+          <div className="space-y-4">
+            {/* Risk Alerts */}
             {result.plan.risk_alerts &&
               result.plan.risk_alerts.length > 0 && (
                 <div className="animate-slide-up" style={{ animationDelay: "0ms" }}>
-                  <RiskAlert alerts={result.plan.risk_alerts} />
+                  <CollapsibleSection
+                    title="Risk Alerts"
+                    badge={`${result.plan.risk_alerts.length} alert${result.plan.risk_alerts.length !== 1 ? "s" : ""}`}
+                    defaultOpen={true}
+                  >
+                    <RiskAlert alerts={result.plan.risk_alerts} />
+                  </CollapsibleSection>
                 </div>
               )}
 
-            {/* Plan */}
+            {/* Action Plan */}
             <div className="animate-slide-up" style={{ animationDelay: "100ms", animationFillMode: "both" }}>
-              <PlanView plan={result.plan} />
+              <CollapsibleSection
+                title="Your Action Plan"
+                subtitle="Personalized weekly steps"
+                defaultOpen={true}
+              >
+                <PlanView plan={result.plan} />
+              </CollapsibleSection>
             </div>
 
-            {/* Two-column: Snapshot + QUBO */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-slide-up" style={{ animationDelay: "200ms", animationFillMode: "both" }}>
-              <SnapshotView snapshot={result.snapshot} />
-              <QUBOVisualization
-                quboResult={result.qubo_result}
-                allActions={[]}
-              />
+            {/* Financial Details: Snapshot + QUBO */}
+            <div className="animate-slide-up" style={{ animationDelay: "200ms", animationFillMode: "both" }}>
+              <CollapsibleSection
+                title="Financial Details"
+                subtitle="Snapshot & optimization breakdown"
+                defaultOpen={false}
+              >
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <SnapshotView snapshot={result.snapshot} />
+                  <QUBOVisualization
+                    quboResult={result.qubo_result}
+                    allActions={[]}
+                  />
+                </div>
+              </CollapsibleSection>
             </div>
 
             {/* Spending Pie Chart */}
             {result.normalizer && result.normalizer.totalSpend > 0 && (
               <div className="animate-slide-up" style={{ animationDelay: "300ms", animationFillMode: "both" }}>
-                <CategoryPieChart
-                  categoryTotals={result.normalizer.categoryTotals}
-                  totalSpend={result.normalizer.totalSpend}
-                />
+                <CollapsibleSection
+                  title="Spending by Category"
+                  badge={`${Object.keys(result.normalizer.categoryTotals).length} categories`}
+                  defaultOpen={false}
+                >
+                  <CategoryPieChart
+                    categoryTotals={result.normalizer.categoryTotals}
+                    totalSpend={result.normalizer.totalSpend}
+                  />
+                </CollapsibleSection>
               </div>
             )}
 
             {/* Workflow Trace */}
             <div className="animate-slide-up" style={{ animationDelay: "400ms", animationFillMode: "both" }}>
-              <WorkflowTrace trace={result.trace} />
+              <CollapsibleSection
+                title="AI Workflow Trace"
+                subtitle="Pipeline execution details"
+                defaultOpen={false}
+              >
+                <WorkflowTrace trace={result.trace} />
+              </CollapsibleSection>
             </div>
 
             {/* Reset */}
             <div className="text-center pt-4 pb-12 animate-fade-in" style={{ animationDelay: "500ms", animationFillMode: "both" }}>
               <button
                 onClick={handleReset}
-                className="px-6 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 rounded-lg text-white font-medium hover:from-orange-600 hover:to-amber-600 transition-all duration-300 shadow-lg shadow-orange-500/20 hover:shadow-orange-500/40"
+                className="px-6 py-2.5 bg-gradient-to-r from-teal-500 to-cyan-500 rounded-lg text-white font-medium hover:from-teal-600 hover:to-cyan-600 transition-all duration-300 shadow-lg shadow-teal-500/20 hover:shadow-teal-500/40"
               >
                 Start Over
               </button>
@@ -248,9 +285,9 @@ export default function Home() {
       </div>
 
       {/* Footer */}
-      <footer className="border-t border-gray-700/50 bg-[#0d0d0d] mt-12">
-        <div className="max-w-5xl mx-auto px-4 py-4 text-center text-xs text-gray-500">
-          <span className="text-orange-500/60">Equity Finance Copilot</span>{" "}
+      <footer className="border-t border-slate-700/50 bg-[#0a1628] mt-12">
+        <div className="max-w-5xl mx-auto px-4 py-4 text-center text-xs text-slate-500">
+          <span className="text-teal-500/60">Equity Finance Copilot</span>{" "}
           — Educational coaching only. Not financial advice. Results may vary.
           Consult a qualified financial advisor for personal decisions.
         </div>

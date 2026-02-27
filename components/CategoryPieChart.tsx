@@ -196,7 +196,7 @@ function PieSlice({
     <path
       d={d}
       fill={slice.color}
-      stroke="#141414"
+      stroke="#1e293b"
       strokeWidth={2}
       style={{
         transform: `translate(${translateX}px, ${translateY}px)`,
@@ -233,7 +233,7 @@ function FullCircleSlice({
       cy={cy}
       r={radius}
       fill={slice.color}
-      stroke="#141414"
+      stroke="#1e293b"
       strokeWidth={2}
       style={{
         transform: `scale(${scale})`,
@@ -304,12 +304,12 @@ function LegendItem({
         className="inline-block h-3 w-3 flex-shrink-0 rounded-full"
         style={{ backgroundColor: slice.color }}
       />
-      <span className="text-sm text-gray-300">
+      <span className="text-sm text-slate-300">
         {capitalize(slice.category)}
-        <span className="mx-1.5 text-gray-600">&mdash;</span>
+        <span className="mx-1.5 text-slate-600">&mdash;</span>
         {formatDollars(slice.value)}
       </span>
-      <span className="text-sm text-gray-500">
+      <span className="text-sm text-slate-500">
         ({formatPercentage(slice.percentage)})
       </span>
     </li>
@@ -352,14 +352,14 @@ export default function CategoryPieChart({
   const isSingleCategory = slices.length === 1;
 
   return (
-    <div className="bg-card rounded-xl shadow-lg shadow-black/20 border border-gray-700/50 p-6 card-glow">
+    <div className="bg-[#1e293b] rounded-xl shadow-lg shadow-black/20 border border-slate-600/50 p-6 card-glow">
       {/* Title */}
-      <h3 className="text-lg font-semibold text-gray-100 mb-4">{title}</h3>
+      <h3 className="text-lg font-semibold text-slate-100 mb-4">{title}</h3>
 
       {isEmpty ? (
         /* Empty state */
         <div className="flex items-center justify-center py-16">
-          <p className="text-gray-500 text-sm">No spending data to display</p>
+          <p className="text-slate-500 text-sm">No spending data to display</p>
         </div>
       ) : (
         /* Chart + Legend layout */
@@ -457,17 +457,17 @@ export default function CategoryPieChart({
 
             {/* Total */}
             <div
-              className="mt-4 pt-3 border-t border-gray-700/50"
+              className="mt-4 pt-3 border-t border-slate-600/50"
               style={{
                 opacity: isMounted ? 1 : 0,
                 transition: `opacity 0.4s ease ${slices.length * 50 + 100}ms`,
               }}
             >
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-400">
+                <span className="text-sm font-medium text-slate-400">
                   Total
                 </span>
-                <span className="text-sm font-semibold text-gray-100">
+                <span className="text-sm font-semibold text-slate-100">
                   {formatDollars(totalSpend)}
                 </span>
               </div>
