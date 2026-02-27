@@ -1,0 +1,28 @@
+{
+  "checking_balance": 340.00,
+  "income": [
+    {
+      "source": "EMPLOYER",
+      "amount": 1400.00,
+      "frequency": "biweekly",
+      "next_date": "2026-03-01"
+    }
+  ],
+  "debts": [
+    {
+      "name": "Chase Visa (credit card)",
+      "balance": 3200.00,
+      "apr": 24.99,
+      "minimum_payment": 96.00,
+      "due_day": 5
+    },
+    {
+      "name": "SoFi Personal Loan",
+      "balance": 1800.00,
+      "apr": 12.00,
+      "minimum_payment": 75.00,
+      "due_day": 6
+    }
+  ],
+  "goal": "stability"
+}
