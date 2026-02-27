@@ -166,10 +166,20 @@ export interface WorkflowTrace {
   completed_at?: string;
 }
 
+// ---- Normalizer Summary (subset shipped to client) ----
+export interface NormalizerSummary {
+  categoryTotals: Record<string, number>;
+  totalSpend: number;
+  schemaMap: { sourceColumn: string; internalField: string; confidence: number; method: string }[];
+  warnings: string[];
+  transactionCount: number;
+}
+
 // ---- API Response ----
 export interface CopilotResponse {
   snapshot: FinancialSnapshot;
   qubo_result: QUBOResult;
   plan: WeeklyPlan;
   trace: WorkflowTrace;
+  normalizer?: NormalizerSummary;
 }

@@ -10,6 +10,7 @@ import WorkflowTrace from "../components/WorkflowTrace";
 import QUBOVisualization from "../components/QUBOVisualization";
 import RiskAlert from "../components/RiskAlert";
 import ChatBot from "../components/ChatBot";
+import CategoryPieChart from "../components/CategoryPieChart";
 import type { CopilotResponse } from "../lib/types";
 
 type Stage = "upload" | "profile" | "loading" | "results";
@@ -218,13 +219,23 @@ export default function Home() {
               />
             </div>
 
+            {/* Spending Pie Chart */}
+            {result.normalizer && result.normalizer.totalSpend > 0 && (
+              <div className="animate-slide-up" style={{ animationDelay: "300ms", animationFillMode: "both" }}>
+                <CategoryPieChart
+                  categoryTotals={result.normalizer.categoryTotals}
+                  totalSpend={result.normalizer.totalSpend}
+                />
+              </div>
+            )}
+
             {/* Workflow Trace */}
-            <div className="animate-slide-up" style={{ animationDelay: "300ms", animationFillMode: "both" }}>
+            <div className="animate-slide-up" style={{ animationDelay: "400ms", animationFillMode: "both" }}>
               <WorkflowTrace trace={result.trace} />
             </div>
 
             {/* Reset */}
-            <div className="text-center pt-4 pb-12 animate-fade-in" style={{ animationDelay: "400ms", animationFillMode: "both" }}>
+            <div className="text-center pt-4 pb-12 animate-fade-in" style={{ animationDelay: "500ms", animationFillMode: "both" }}>
               <button
                 onClick={handleReset}
                 className="px-6 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 rounded-lg text-white font-medium hover:from-orange-600 hover:to-amber-600 transition-all duration-300 shadow-lg shadow-orange-500/20 hover:shadow-orange-500/40"

@@ -22,6 +22,7 @@ import {
   CopilotResponse,
 } from "@/lib/types";
 import { parseCSV, buildSnapshot } from "@/lib/parser";
+import { normalizeFinancialData } from "@/lib/normalizer";
 import { getEligibleActions } from "@/lib/actions";
 import { solveQUBO } from "@/lib/qubo";
 import {
@@ -218,6 +219,20 @@ export async function POST(request: NextRequest) {
     });
 
     // ============================================================
+    // STEP 1b: Universal normalizer (schema inference + category totals)
+    // ============================================================
+    const stepNormStart = Date.now();
+    const normResult = normalizeFinancialData(text, fileType);
+
+    traceSteps.push({
+      tool: "universal-normalizer",
+      input_summary: `${fileType.toUpperCase()} → schema inference on ${normResult.schemaMap.length} columns`,
+      output_summary: `${normResult.normalizedTransactions.length} txns normalized, ${Object.keys(normResult.categoryTotals).length} categories, ${normResult.warnings.length} warnings`,
+      timestamp: new Date(stepNormStart).toISOString(),
+      duration_ms: Date.now() - stepNormStart,
+    });
+
+    // ============================================================
     // STEP 2: Build the financial snapshot
     // ============================================================
     const stepSnapshotStart = Date.now();
@@ -393,6 +408,13 @@ export async function POST(request: NextRequest) {
       qubo_result: quboResult,
       plan,
       trace,
+      normalizer: {
+        categoryTotals: normResult.categoryTotals,
+        totalSpend: normResult.totalSpend,
+        schemaMap: normResult.schemaMap,
+        warnings: normResult.warnings,
+        transactionCount: normResult.normalizedTransactions.length,
+      },
     };
 
     return NextResponse.json(response);
