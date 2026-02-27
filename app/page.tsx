@@ -210,7 +210,7 @@ export default function Home() {
   const handleClimateUpload = useCallback(async (f: File) => {
     setStage("loading");
     setError(null);
-    setLoadingStep("Analyzing your spending footprint...");
+    setLoadingStep("Analyzing your spending patterns...");
 
     try {
       const formData = new FormData();
@@ -404,7 +404,7 @@ export default function Home() {
                   <h2 className="text-xl font-semibold text-slate-100">Climate Wallet</h2>
                 </div>
                 <p className="text-slate-400 mb-6 text-sm">
-                  Upload your transactions to estimate your spending carbon footprint, discover low-friction swaps, and find local green incentives.
+                  Upload your transactions to analyze your spending patterns, discover where your money flows, and get personalized insights.
                 </p>
                 <FileUpload
                   key={`climate-${sessionKey}`}

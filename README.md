@@ -6,7 +6,7 @@ An AI-powered financial coaching platform with quantum-ready optimization, desig
 
 ## Overview
 
-One Day or Day One is an agentic AI fintech application that combines universal data intake, financial snapshot analysis, QUBO optimization, scenario simulation, and climate-aware spending insights. It is built for equity — designed for underserved communities who need practical, shame-free financial guidance.
+One Day or Day One is an agentic AI fintech application that combines universal data intake, financial snapshot analysis, QUBO optimization, scenario simulation, and comprehensive spending insights. It is built for equity — designed for underserved communities who need practical, shame-free financial guidance.
 
 The platform delivers personalized financial coaching through an intelligent pipeline: upload your data (or answer a few questions), and the system analyzes spending patterns, detects risks, optimizes action plans, and projects your financial trajectory — all in seconds.
 
@@ -24,9 +24,9 @@ The platform delivers personalized financial coaching through an intelligent pip
 
 5. **90-Day Equity Curve** — Balance projection with income and expense markers, risk zones, and monotone cubic spline interpolation for smooth, accurate forecasting.
 
-6. **GenAI Scenario Simulator** — Simulate financial shocks (rent spike, medical emergency, job loss, car repair) with projected outcomes, risk windows, and negotiation scripts tailored to your situation.
+6. **GenAI Scenario Simulator** — Upload any CSV or JSON, choose a financial shock scenario (rent spike, medical emergency, job loss, car repair), select a timeframe (30, 60, or 90 days), and see projected outcomes, risk windows, top actions, and negotiation scripts tailored to your situation.
 
-7. **Climate Wallet** — Estimate your spending carbon footprint using emission factors, discover low-friction swaps to reduce environmental impact, and find local green incentives.
+7. **Climate Wallet** — Comprehensive spending analyzer that tracks where your money flows. View spending by category with an interactive pie chart, identify top merchants, visualize spending trends over time, and receive auto-generated insights to improve your financial habits.
 
 8. **Personalized Weekly Plan** — AI-generated action plan with prioritized steps, savings estimates, and motivational coaching. Actionable guidance, not generic advice.
 
@@ -98,7 +98,7 @@ Hack/
 │   ├── api/
 │   │   ├── build-snapshot/route.ts   # Financial snapshot computation
 │   │   ├── chat/route.ts             # AI chat assistant endpoint
-│   │   ├── climate/route.ts          # Carbon footprint analysis
+│   │   ├── climate/route.ts          # Spending analysis for Climate Wallet
 │   │   ├── optimize/route.ts         # QUBO optimization endpoint
 │   │   ├── parse-upload/route.ts     # File parsing and normalization
 │   │   ├── pipeline/route.ts         # Full analysis pipeline
@@ -112,6 +112,7 @@ Hack/
 │   ├── ActionCard.tsx                # Optimized action display cards
 │   ├── CategoryPieChart.tsx          # SVG pie chart for spending
 │   ├── ChatBot.tsx                   # AI chat assistant interface
+│   ├── ClimateWallet.tsx             # Spending analysis dashboard
 │   ├── CollapsibleSection.tsx        # Expandable content sections
 │   ├── ConversationalIntake.tsx      # Chat-based financial intake
 │   ├── EquityCurve.tsx               # 90-day balance projection chart
@@ -122,6 +123,8 @@ Hack/
 │   ├── ProfileForm.tsx               # Manual profile input form
 │   ├── QUBOVisualization.tsx         # Optimization process visualization
 │   ├── RiskAlert.tsx                 # Risk window alerts
+│   ├── ScenarioSimulator.tsx         # Financial shock scenario simulator
+│   ├── SchemaInferencePanel.tsx      # Schema mapping visualization
 │   ├── SnapshotView.tsx              # Financial snapshot dashboard
 │   └── WorkflowTrace.tsx            # Pipeline execution trace
 ├── lib/
@@ -133,10 +136,12 @@ Hack/
 │   ├── tools.ts                      # Utility functions
 │   └── types.ts                      # TypeScript type definitions
 ├── demo/
-│   └── demo_profile.json             # Sample financial profile
+│   ├── demo_profile.json             # Sample financial profile
+│   └── demo_transactions.csv         # Sample transaction data
 ├── public/
 │   └── demo/
-│       └── demo_profile.json         # Public demo data
+│       ├── demo_profile.json         # Public demo profile
+│       └── demo_transactions.csv     # Public demo transactions
 ├── package.json
 ├── tailwind.config.ts
 └── tsconfig.json
@@ -164,15 +169,15 @@ Hack/
 
 ### Financial Copilot
 
-The full analysis pipeline. Upload a CSV or JSON file, or use the conversational intake to build your profile. The system runs the complete pipeline: parse, snapshot, optimize, plan, and visualize.
+The full analysis pipeline. Upload a CSV or JSON file, or use the conversational intake to build your financial profile. The system runs the complete pipeline: parse, snapshot, optimize, plan, and visualize. Supports flexible data formats through intelligent schema inference.
 
 ### Scenario Simulator
 
-What-if analysis for financial shocks. Select a scenario type (rent spike, medical emergency, job loss, car repair), configure severity, and see projected outcomes including updated equity curves, risk windows, and negotiation scripts.
+What-if financial shock simulation. Upload any CSV or JSON with your transaction data, choose a scenario (rent spike, medical emergency, job loss, car repair), select a timeframe (30, 60, or 90 days), and see projected outcomes including risk windows, top recommended actions, and negotiation scripts tailored to your situation.
 
 ### Climate Wallet
 
-Estimate the carbon footprint of your spending using category-based emission factors. Discover low-friction swaps that reduce environmental impact without lifestyle disruption, and explore local green incentives and rebates.
+Comprehensive spending analysis and insights dashboard. Upload your transaction data and get a full breakdown of where your money flows — spending by category (interactive pie chart), top merchants, spending trends over time, and auto-generated insights to help you make smarter financial decisions.
 
 ---
 

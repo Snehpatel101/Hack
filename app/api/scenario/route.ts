@@ -6,19 +6,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { normalizeFinancialData } from "@/lib/normalizer";
 
-/** The set of supported scenario types. */
-const VALID_SCENARIOS = [
-  "rent_spike",
-  "medical_emergency",
-  "job_loss",
-  "car_repair",
-] as const;
-
-type Scenario = (typeof VALID_SCENARIOS)[number];
-
-/** The set of supported timeframes (in days). */
-const VALID_TIMEFRAMES = [30, 60, 90] as const;
-
 export async function POST(request: NextRequest) {
   try {
     // --------------------------------------------------------
@@ -27,49 +14,11 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData();
 
     const file = formData.get("file");
-    const scenarioField = formData.get("scenario");
-    const timeframeField = formData.get("timeframe");
 
-    // --- Validate required fields ---
+    // --- Validate required field ---
     if (!file || !(file instanceof File)) {
       return NextResponse.json(
         { error: "Missing required field: 'file'. Upload a CSV or JSON file." },
-        { status: 400 }
-      );
-    }
-
-    if (!scenarioField || typeof scenarioField !== "string") {
-      return NextResponse.json(
-        { error: "Missing required field: 'scenario'." },
-        { status: 400 }
-      );
-    }
-
-    if (!timeframeField) {
-      return NextResponse.json(
-        { error: "Missing required field: 'timeframe'." },
-        { status: 400 }
-      );
-    }
-
-    // --- Validate scenario ---
-    const scenario = scenarioField as string;
-    if (!VALID_SCENARIOS.includes(scenario as Scenario)) {
-      return NextResponse.json(
-        {
-          error: `Invalid scenario '${scenario}'. Must be one of: ${VALID_SCENARIOS.join(", ")}.`,
-        },
-        { status: 400 }
-      );
-    }
-
-    // --- Validate timeframe ---
-    const timeframe = Number(timeframeField);
-    if (isNaN(timeframe) || !VALID_TIMEFRAMES.includes(timeframe as 30 | 60 | 90)) {
-      return NextResponse.json(
-        {
-          error: `Invalid timeframe '${timeframeField}'. Must be one of: ${VALID_TIMEFRAMES.join(", ")}.`,
-        },
         { status: 400 }
       );
     }
@@ -146,8 +95,6 @@ export async function POST(request: NextRequest) {
         totalSpend: normResult.totalSpend,
         transactionCount: normResult.normalizedTransactions.length,
       },
-      scenario,
-      timeframe,
     });
   } catch (err: unknown) {
     console.error("[scenario] Unexpected error:", err);
