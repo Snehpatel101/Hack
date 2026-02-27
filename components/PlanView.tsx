@@ -1,7 +1,6 @@
 "use client";
 
-import type { WeeklyPlan } from "../lib/types";
-import ActionCard from "./ActionCard";
+import type { WeeklyPlan, WeeklyPlanAction } from "../lib/types";
 import RiskAlert from "./RiskAlert";
 
 interface PlanViewProps {
@@ -17,119 +16,185 @@ function formatCurrency(amount: number): string {
   }).format(amount);
 }
 
+const PRIORITY_BADGE: Record<
+  WeeklyPlanAction["priority"],
+  { className: string; label: string }
+> = {
+  must_do: {
+    className: "bg-red-500/20 text-red-400",
+    label: "Must Do",
+  },
+  should_do: {
+    className: "bg-teal-500/20 text-teal-400",
+    label: "Should Do",
+  },
+  nice_to_have: {
+    className: "bg-slate-600/50 text-slate-400",
+    label: "Nice to Have",
+  },
+};
+
 export default function PlanView({ plan }: PlanViewProps) {
   const [savingsLow, savingsHigh] = plan.total_estimated_monthly_savings;
 
+  // Collect top 3 from week_1 and everything else into remaining
+  const top3 = plan.week_1.slice(0, 3);
+  const remaining = [
+    ...plan.week_1.slice(3),
+    ...plan.week_2,
+    ...plan.ongoing,
+  ];
+
   return (
     <div className="space-y-8 animate-fade-in">
-      {/* Summary */}
+      {/* ── Summary ── */}
       <section className="rounded-xl bg-[#1e293b] border border-slate-600/50 p-6 shadow-lg shadow-black/20 card-glow transition-all duration-300">
-        <h2 className="text-lg font-bold text-slate-100">Your Financial Plan</h2>
+        <h2 className="text-lg font-bold text-slate-100">
+          Your Financial Plan
+        </h2>
         <p className="mt-2 text-sm leading-relaxed text-slate-400">
           {plan.summary}
         </p>
-
-        {/* Total Savings Banner */}
-        <div className="mt-4 flex items-center gap-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 px-4 py-3">
-          <svg
-            className="h-6 w-6 text-emerald-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            aria-hidden="true"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
-            />
-          </svg>
-          <div>
-            <p className="text-xs font-medium text-emerald-400">
-              Estimated Monthly Savings
-            </p>
-            <p className="text-lg font-bold text-emerald-300">
-              {formatCurrency(savingsLow)} &ndash; {formatCurrency(savingsHigh)}
-            </p>
-          </div>
-        </div>
+        <p className="mt-3 text-sm font-medium text-teal-400">
+          Estimated savings: {formatCurrency(savingsLow)}&ndash;
+          {formatCurrency(savingsHigh)}/month
+        </p>
       </section>
 
-      {/* Risk Alerts */}
-      {plan.risk_alerts.length > 0 && (
-        <RiskAlert alerts={plan.risk_alerts} />
-      )}
+      {/* ── Risk Alerts ── */}
+      {plan.risk_alerts.length > 0 && <RiskAlert alerts={plan.risk_alerts} />}
 
-      {/* Week 1 Actions */}
-      {plan.week_1.length > 0 && (
-        <ActionSection title="Week 1 Actions" actions={plan.week_1} />
-      )}
-
-      {/* Week 2 Actions */}
-      {plan.week_2.length > 0 && (
-        <ActionSection title="Week 2 Actions" actions={plan.week_2} />
-      )}
-
-      {/* Ongoing Actions */}
-      {plan.ongoing.length > 0 && (
-        <ActionSection title="Ongoing Actions" actions={plan.ongoing} />
-      )}
-
-      {/* Encouragement */}
-      {plan.encouragement && (
-        <section className="rounded-xl border border-teal-500/20 bg-teal-500/10 p-6 animate-slide-up">
-          <div className="flex items-start gap-3">
-            <svg
-              className="mt-0.5 h-5 w-5 flex-shrink-0 text-teal-400 animate-float"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+      {/* ── Top 3 Priority Actions ── */}
+      {top3.length > 0 && (
+        <section>
+          <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-teal-400/80">
+            Top 3 Priority Actions
+          </h3>
+          <div className="space-y-4">
+            {top3.map((action, index) => (
+              <TopActionCard
+                key={action.action_id || index}
+                action={action}
+                step={index + 1}
               />
-            </svg>
-            <p className="text-sm font-medium text-teal-300">
-              {plan.encouragement}
-            </p>
+            ))}
           </div>
         </section>
       )}
 
-      {/* Disclaimer */}
+      {/* ── Remaining Actions (compact) ── */}
+      {remaining.length > 0 && (
+        <section>
+          <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+            More Actions
+          </h3>
+          <ul className="space-y-1">
+            {remaining.map((action, index) => (
+              <li
+                key={action.action_id || `remaining-${index}`}
+                className="flex items-center justify-between rounded-lg bg-[#1e293b]/60 px-4 py-2"
+              >
+                <span className="text-sm text-slate-300 truncate mr-3">
+                  {action.action_name}
+                </span>
+                {action.estimated_savings && (
+                  <span className="flex-shrink-0 text-xs text-teal-400/70">
+                    {action.estimated_savings}
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {/* ── Encouragement ── */}
+      {plan.encouragement && (
+        <p className="text-sm italic text-slate-500 px-1">
+          {plan.encouragement}
+        </p>
+      )}
+
+      {/* ── Disclaimer ── */}
       {plan.disclaimer && (
-        <footer className="rounded-lg bg-[#1e293b] border border-slate-600/50 px-4 py-3">
-          <p className="text-xs leading-relaxed text-slate-500">
-            {plan.disclaimer}
-          </p>
-        </footer>
+        <p className="text-xs text-slate-600 px-1">{plan.disclaimer}</p>
       )}
     </div>
   );
 }
 
-function ActionSection({
-  title,
-  actions,
+/* ------------------------------------------------------------------ */
+/*  Top Action Card — prominent card with step number, why, how, etc. */
+/* ------------------------------------------------------------------ */
+
+function TopActionCard({
+  action,
+  step,
 }: {
-  title: string;
-  actions: import("../lib/types").WeeklyPlanAction[];
+  action: WeeklyPlanAction;
+  step: number;
 }) {
+  const badge = PRIORITY_BADGE[action.priority];
+
+  const howSteps = action.how
+    .split(/\n|(?=\d+\.\s)/)
+    .map((s) => s.replace(/^\d+\.\s*/, "").trim())
+    .filter((s) => s.length > 0);
+
   return (
-    <section>
-      <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-teal-400/80">
-        {title}
-      </h3>
-      <div className="space-y-3">
-        {actions.map((action, index) => (
-          <ActionCard key={action.action_id || index} action={action} />
-        ))}
+    <article className="rounded-xl border border-slate-600/50 bg-[#1e293b] p-5 shadow-lg shadow-black/20 card-glow transition-all duration-300 animate-slide-up">
+      {/* Header row */}
+      <div className="flex items-start gap-3">
+        {/* Step number */}
+        <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-teal-500/15 text-sm font-bold text-teal-400">
+          {step}
+        </span>
+
+        <div className="flex-1 min-w-0">
+          <div className="flex items-start justify-between gap-3">
+            <h4 className="text-base font-bold text-slate-100">
+              {action.action_name}
+            </h4>
+            <span
+              className={`flex-shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium ${badge.className}`}
+            >
+              {badge.label}
+            </span>
+          </div>
+
+          {/* Why */}
+          <p className="mt-1.5 text-sm text-slate-400">{action.why}</p>
+        </div>
       </div>
-    </section>
+
+      {/* How steps */}
+      {howSteps.length > 0 && (
+        <div className="mt-4 pl-10">
+          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
+            How
+          </p>
+          <ol className="mt-1.5 space-y-1">
+            {howSteps.map((s, i) => (
+              <li
+                key={i}
+                className="flex items-start gap-2 text-sm text-slate-300"
+              >
+                <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-teal-500/15 text-xs font-medium text-teal-400">
+                  {i + 1}
+                </span>
+                <span>{s}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
+
+      {/* Estimated savings */}
+      {action.estimated_savings && (
+        <p className="mt-3 pl-10 text-xs font-medium text-teal-400/80">
+          Estimated savings: {action.estimated_savings}
+        </p>
+      )}
+    </article>
   );
 }

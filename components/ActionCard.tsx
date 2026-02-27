@@ -21,7 +21,7 @@ const PRIORITY_STYLES: Record<
     label: "Should Do",
   },
   nice_to_have: {
-    badge: "bg-slate-700 text-slate-400",
+    badge: "bg-slate-600/50 text-slate-400",
     border: "border-l-slate-600",
     label: "Nice to Have",
   },

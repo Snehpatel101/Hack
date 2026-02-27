@@ -566,15 +566,18 @@ export default function EquityCurve({ snapshot }: EquityCurveProps) {
             const cx = dataX(p.day);
             const cy = dataY(p.balance, minY, maxY);
 
-            // Determine if this is a "danger" event (balance dropped below $100 due to a bill)
-            const isBillCausingDanger =
-              p.balance < 100 && p.event && p.event.includes("-");
+            // Determine dot color by event type
             const isIncomeEvent = p.event && p.event.includes("+");
-            const circleColor = isBillCausingDanger
-              ? "#ef4444"
-              : isIncomeEvent
-                ? "#2dd4bf"
-                : "#2dd4bf";
+            const isExpenseEvent = p.event && p.event.includes("-");
+            const isBillCausingDanger =
+              p.balance < 100 && isExpenseEvent;
+            const circleColor = isIncomeEvent
+              ? "#10b981"
+              : isBillCausingDanger
+                ? "#ef4444"
+                : isExpenseEvent
+                  ? "#f59e0b"
+                  : "#2dd4bf";
 
             return (
               <g key={`event-${idx}`}>
@@ -735,9 +738,13 @@ export default function EquityCurve({ snapshot }: EquityCurveProps) {
                     x={tooltipX + 10}
                     y={clampedY + 34}
                     fill={
-                      p.event.includes("-") && p.balance < 100
-                        ? "#f87171"
-                        : "#5eead4"
+                      p.event.includes("+")
+                        ? "#34d399"
+                        : p.event.includes("-") && p.balance < 100
+                          ? "#f87171"
+                          : p.event.includes("-")
+                            ? "#fbbf24"
+                            : "#94a3b8"
                     }
                     fontSize="10"
                     fontFamily="sans-serif"

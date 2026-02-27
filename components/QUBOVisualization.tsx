@@ -1,132 +1,278 @@
 "use client";
 
+import { useState } from "react";
 import type { QUBOResult, SelectedAction } from "../lib/types";
 
+// ---------------------------------------------------------------------------
+// Props
+// ---------------------------------------------------------------------------
 interface QUBOVisualizationProps {
   quboResult: QUBOResult;
   allActions: SelectedAction[];
 }
 
+// ---------------------------------------------------------------------------
+// Solver display names
+// ---------------------------------------------------------------------------
 const SOLVER_LABELS: Record<QUBOResult["solver_used"], string> = {
-  exact_enumeration: "Exact Enumeration",
+  exact_enumeration: "Exact (all combos tested)",
   simulated_annealing: "Simulated Annealing",
   greedy_fallback: "Greedy Fallback",
 };
 
-export default function QUBOVisualization({
-  quboResult,
-  allActions,
-}: QUBOVisualizationProps) {
-  const selectedIds = new Set(quboResult.selected_action_ids);
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+function formatIterations(n: number): string {
+  return n.toLocaleString();
+}
 
-  const selectedActions = allActions.filter((a) => selectedIds.has(a.id));
-  const rejectedActions = allActions.filter((a) => !selectedIds.has(a.id));
+function isInfeasible(result: QUBOResult): boolean {
+  return (
+    (result.objective_value > 1000 || result.selected_action_ids.length === 0) &&
+    result.solver_used === "greedy_fallback"
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Sub-components
+// ---------------------------------------------------------------------------
+
+/** A single metric card in the top row. */
+function MetricCard({
+  label,
+  children,
+  sublabel,
+}: {
+  label: string;
+  children: React.ReactNode;
+  sublabel?: string;
+}) {
+  return (
+    <div className="bg-[#0f172a] rounded-lg px-4 py-3 text-center flex flex-col items-center justify-center">
+      <p className="text-xs text-slate-500 font-medium">{label}</p>
+      <div className="mt-1 text-lg font-semibold">{children}</div>
+      {sublabel && (
+        <p className="mt-0.5 text-[11px] text-slate-500">{sublabel}</p>
+      )}
+    </div>
+  );
+}
+
+/** A single selected-action chip. */
+function ActionChip({ action }: { action: SelectedAction }) {
+  const [low, high] = action.estimated_monthly_impact;
 
   return (
-    <div className="rounded-xl bg-[#1e293b] border border-slate-600/50 p-6 shadow-lg shadow-black/20 card-glow transition-all duration-300 animate-fade-in">
-      <h3 className="text-sm font-semibold text-slate-100">
-        QUBO Optimization Results
-      </h3>
-      <p className="mt-1 text-xs text-slate-500">
-        Actions selected by the quantum-inspired optimizer to maximize impact
-        within your constraints.
-      </p>
+    <div className="group relative inline-flex items-center gap-1.5 rounded-full bg-teal-500/15 border border-teal-500/30 px-3 py-1.5 text-xs font-medium text-teal-300 transition-all duration-200">
+      <span
+        className="h-1.5 w-1.5 rounded-full bg-teal-400"
+        aria-hidden="true"
+      />
+      <span>{action.name}</span>
 
-      {/* Solver Stats */}
-      <div className="mt-4 grid grid-cols-3 gap-3">
-        <div className="rounded-lg bg-[#1e293b] border border-slate-600/50 px-3 py-2 text-center">
-          <p className="text-xs text-slate-500">Solver</p>
-          <p className="mt-0.5 text-sm font-medium text-slate-200">
-            {SOLVER_LABELS[quboResult.solver_used]}
-          </p>
-        </div>
-        <div className="rounded-lg bg-[#1e293b] border border-slate-600/50 px-3 py-2 text-center">
-          <p className="text-xs text-slate-500">Objective Value</p>
-          <p className="mt-0.5 text-sm font-medium text-teal-400">
-            {quboResult.objective_value.toFixed(2)}
-          </p>
-        </div>
-        <div className="rounded-lg bg-[#1e293b] border border-slate-600/50 px-3 py-2 text-center">
-          <p className="text-xs text-slate-500">Iterations</p>
-          <p className="mt-0.5 text-sm font-medium text-slate-200">
-            {quboResult.iterations !== undefined
-              ? quboResult.iterations.toLocaleString()
-              : "N/A"}
-          </p>
-        </div>
+      {/* Hover tooltip */}
+      <div
+        role="tooltip"
+        className="pointer-events-none absolute -top-10 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-md bg-slate-900 border border-slate-700 px-2.5 py-1 text-xs text-slate-200 opacity-0 shadow-lg transition-opacity group-hover:opacity-100"
+      >
+        ${low}&ndash;${high}/mo &middot; Risk: &minus;{action.risk_reduction}
       </div>
+    </div>
+  );
+}
 
-      {/* Selected Actions */}
-      <div className="mt-5">
-        <p className="text-xs font-medium uppercase tracking-wide text-teal-400">
-          Selected ({selectedActions.length})
-        </p>
-        <div className="mt-2 flex flex-wrap gap-2">
-          {selectedActions.length > 0 ? (
-            selectedActions.map((action) => (
-              <ActionChip key={action.id} action={action} selected />
-            ))
-          ) : (
-            <p className="text-xs text-slate-600">No actions selected</p>
-          )}
-        </div>
-      </div>
+/** Expandable "How does this work?" section. */
+function HowItWorks() {
+  const [open, setOpen] = useState(false);
 
-      {/* Rejected Actions */}
-      {rejectedActions.length > 0 && (
-        <div className="mt-4">
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-            Not Selected ({rejectedActions.length})
+  return (
+    <div className="mt-5 rounded-lg border border-slate-700/50 bg-[#0f172a]/60">
+      <button
+        type="button"
+        onClick={() => setOpen((prev) => !prev)}
+        className="flex w-full items-center justify-between px-4 py-2.5 text-left text-xs font-medium text-slate-400 hover:text-slate-300 transition-colors"
+        aria-expanded={open}
+      >
+        <span className="flex items-center gap-1.5">
+          <InfoIcon />
+          How does this work?
+        </span>
+        <ChevronIcon open={open} />
+      </button>
+
+      {open && (
+        <div className="px-4 pb-4 text-xs leading-relaxed text-slate-400 space-y-3 animate-fade-in">
+          <p>
+            The QUBO (Quadratic Unconstrained Binary Optimization) formulation
+            treats each financial action as a binary variable (do it or skip it).
+            The optimizer finds the combination that maximizes impact while
+            respecting your time budget and minimum balance buffer.
           </p>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {rejectedActions.map((action) => (
-              <ActionChip key={action.id} action={action} selected={false} />
-            ))}
-          </div>
+          <ul className="list-disc list-inside space-y-1 text-slate-500">
+            <li>Solved on classical simulator today</li>
+            <li>
+              Formulation is quantum hardware-ready (D-Wave, IBM Qiskit
+              compatible)
+            </li>
+            <li>Fallback solvers ensure results even with many actions</li>
+          </ul>
         </div>
       )}
     </div>
   );
 }
 
-function ActionChip({
-  action,
-  selected,
-}: {
-  action: SelectedAction;
-  selected: boolean;
-}) {
-  const [low, high] = action.estimated_monthly_impact;
+/** Small info circle icon (inline SVG to avoid extra deps). */
+function InfoIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 20 20"
+      fill="currentColor"
+      className="h-3.5 w-3.5"
+      aria-hidden="true"
+    >
+      <path
+        fillRule="evenodd"
+        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z"
+        clipRule="evenodd"
+      />
+    </svg>
+  );
+}
+
+/** Chevron that rotates when the section is open. */
+function ChevronIcon({ open }: { open: boolean }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 20 20"
+      fill="currentColor"
+      className={`h-4 w-4 transition-transform duration-200 ${
+        open ? "rotate-180" : ""
+      }`}
+      aria-hidden="true"
+    >
+      <path
+        fillRule="evenodd"
+        d="M5.22 8.22a.75.75 0 011.06 0L10 11.94l3.72-3.72a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.22 9.28a.75.75 0 010-1.06z"
+        clipRule="evenodd"
+      />
+    </svg>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Main component
+// ---------------------------------------------------------------------------
+export default function QUBOVisualization({
+  quboResult,
+  allActions,
+}: QUBOVisualizationProps) {
+  const selectedIds = new Set(quboResult.selected_action_ids);
+  const selectedActions = allActions.filter((a) => selectedIds.has(a.id));
+  const totalActions = allActions.length;
+  const selectedCount = quboResult.selected_action_ids.length;
+  const hasSelections = selectedCount > 0;
+  const infeasible = isInfeasible(quboResult);
+
+  // Build solver subtitle (includes iterations when available)
+  const solverName = SOLVER_LABELS[quboResult.solver_used];
+  const iterationsLabel =
+    quboResult.iterations !== undefined
+      ? `(${formatIterations(quboResult.iterations)} iterations)`
+      : null;
 
   return (
-    <div
-      className={`
-        group relative inline-flex items-center gap-1.5 rounded-full px-3 py-1.5
-        text-xs font-medium transition-all duration-300
-        ${
-          selected
-            ? "bg-teal-500/15 text-teal-300 border border-teal-500/30"
-            : "bg-slate-700 text-slate-500 border border-slate-600/50"
-        }
-      `}
-    >
-      {/* Status indicator */}
-      <span
-        className={`h-2 w-2 rounded-full ${
-          selected ? "bg-teal-500" : "bg-slate-600"
-        }`}
-        aria-hidden="true"
-      />
-
-      <span>{action.name}</span>
-
-      {/* Tooltip-style detail on hover */}
-      <div
-        className="pointer-events-none absolute -top-10 left-1/2 z-10 -translate-x-1/2 whitespace-nowrap rounded-md bg-slate-900 border border-slate-700 px-2.5 py-1 text-xs text-slate-200 opacity-0 shadow-lg transition-opacity group-hover:opacity-100"
-        role="tooltip"
-      >
-        ${low}&ndash;${high}/mo | Risk: -{action.risk_reduction}
+    <div className="rounded-xl bg-[#1e293b] border border-slate-600/50 p-6 shadow-lg shadow-black/20 card-glow transition-all duration-300 animate-fade-in">
+      {/* ---- Header ---- */}
+      <div className="flex items-start justify-between">
+        <div>
+          <h3 className="text-sm font-semibold text-slate-100">
+            Optimization Engine
+          </h3>
+          <p className="mt-1 text-xs text-slate-500 max-w-md">
+            Quantum-inspired (QUBO) optimizer selects the best combination of
+            actions within your constraints.
+          </p>
+        </div>
+        <span className="bg-violet-500/15 text-violet-400 text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap">
+          quantum-inspired
+        </span>
       </div>
+
+      {/* ---- Key Metrics Row ---- */}
+      <div className="mt-5 grid grid-cols-3 gap-3">
+        {/* Actions Selected */}
+        <MetricCard label="Actions Selected">
+          <span className={hasSelections ? "text-teal-400" : "text-red-400"}>
+            {selectedCount}
+          </span>
+          <span className="text-slate-500 text-sm font-normal">
+            {" "}
+            of {totalActions}
+          </span>
+        </MetricCard>
+
+        {/* Solver */}
+        <MetricCard label="Solver" sublabel={iterationsLabel ?? undefined}>
+          <span className="text-slate-200 text-sm">{solverName}</span>
+        </MetricCard>
+
+        {/* Optimization Score */}
+        <MetricCard label="Optimization Score" sublabel="lower = better fit">
+          <span className="text-teal-400">
+            {Math.abs(quboResult.objective_value).toFixed(1)}
+          </span>
+        </MetricCard>
+      </div>
+
+      {/* ---- Infeasible State ---- */}
+      {infeasible && (
+        <div className="mt-4 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs leading-relaxed text-amber-300/90">
+          Constraints were too tight for full optimization. The greedy fallback
+          selected the highest-impact actions that fit your budget. Consider
+          increasing your available time to unlock more savings.
+        </div>
+      )}
+
+      {/* ---- Selected Actions ---- */}
+      <div className="mt-5">
+        {hasSelections ? (
+          <>
+            <p className="text-xs font-medium uppercase tracking-wide text-teal-400 mb-2">
+              Selected Actions
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {selectedActions.length > 0
+                ? selectedActions.map((action) => (
+                    <ActionChip key={action.id} action={action} />
+                  ))
+                : quboResult.selected_action_ids.map((id) => (
+                    <span
+                      key={id}
+                      className="inline-flex items-center rounded-full bg-teal-500/15 border border-teal-500/30 px-3 py-1.5 text-xs font-medium text-teal-300"
+                    >
+                      {id}
+                    </span>
+                  ))}
+            </div>
+          </>
+        ) : (
+          <div className="flex items-start gap-2.5 rounded-lg border border-slate-600/40 bg-slate-800/50 px-4 py-3">
+            <InfoIcon />
+            <p className="text-xs leading-relaxed text-slate-400">
+              No actions could be optimized within the current constraints. The
+              system has applied a fallback plan to ensure you still receive
+              guidance.
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* ---- How It Works (expandable) ---- */}
+      <HowItWorks />
     </div>
   );
 }

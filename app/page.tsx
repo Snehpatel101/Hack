@@ -247,56 +247,33 @@ export default function Home() {
         {/* Stage: Results */}
         {stage === "results" && result && (
           <div className="space-y-4">
-            {/* Risk Alerts */}
+            {/* 1. Risk Alerts — urgent banner, no collapsible wrapper */}
             {result.plan.risk_alerts &&
               result.plan.risk_alerts.length > 0 && (
-                <div className="animate-slide-up" style={{ animationDelay: "0ms" }}>
-                  <CollapsibleSection
-                    title="Risk Alerts"
-                    badge={`${result.plan.risk_alerts.length} alert${result.plan.risk_alerts.length !== 1 ? "s" : ""}`}
-                    defaultOpen={false}
-                  >
-                    <RiskAlert alerts={result.plan.risk_alerts} />
-                  </CollapsibleSection>
+                <div className="animate-slide-up" style={{ animationDelay: "0ms", animationFillMode: "both" }}>
+                  <RiskAlert alerts={result.plan.risk_alerts} />
                 </div>
               )}
 
-            {/* Action Plan */}
+            {/* 2. 90-Day Balance Projection — direct, no collapsible wrapper */}
             <div className="animate-slide-up" style={{ animationDelay: "100ms", animationFillMode: "both" }}>
+              <EquityCurve snapshot={result.snapshot} />
+            </div>
+
+            {/* 3. Your Action Plan — main deliverable */}
+            <div className="animate-slide-up" style={{ animationDelay: "200ms", animationFillMode: "both" }}>
               <CollapsibleSection
                 title="Your Action Plan"
                 subtitle="Personalized weekly steps"
-                defaultOpen={false}
+                defaultOpen={true}
               >
                 <PlanView plan={result.plan} />
               </CollapsibleSection>
             </div>
 
-            {/* Financial Details: Snapshot + QUBO */}
-            <div className="animate-slide-up" style={{ animationDelay: "200ms", animationFillMode: "both" }}>
-              <CollapsibleSection
-                title="Financial Details"
-                subtitle="Snapshot & optimization breakdown"
-                defaultOpen={true}
-              >
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <SnapshotView snapshot={result.snapshot} />
-                  <QUBOVisualization
-                    quboResult={result.qubo_result}
-                    allActions={[]}
-                  />
-                </div>
-              </CollapsibleSection>
-            </div>
-
-            {/* Equity Curve — 30-Day Balance Projection */}
-            <div className="animate-slide-up" style={{ animationDelay: "300ms", animationFillMode: "both" }}>
-              <EquityCurve snapshot={result.snapshot} />
-            </div>
-
-            {/* Spending Pie Chart */}
+            {/* 4. Spending by Category — pie chart */}
             {result.normalizer && result.normalizer.totalSpend > 0 && (
-              <div className="animate-slide-up" style={{ animationDelay: "400ms", animationFillMode: "both" }}>
+              <div className="animate-slide-up" style={{ animationDelay: "300ms", animationFillMode: "both" }}>
                 <CollapsibleSection
                   title="Spending by Category"
                   badge={`${Object.keys(result.normalizer.categoryTotals).length} categories`}
@@ -310,7 +287,32 @@ export default function Home() {
               </div>
             )}
 
-            {/* Reset */}
+            {/* 5. QUBO Optimization — judges need to see this */}
+            <div className="animate-slide-up" style={{ animationDelay: "400ms", animationFillMode: "both" }}>
+              <CollapsibleSection
+                title="QUBO Optimization"
+                subtitle="Quantum-ready action optimization"
+                defaultOpen={true}
+              >
+                <QUBOVisualization
+                  quboResult={result.qubo_result}
+                  allActions={[]}
+                />
+              </CollapsibleSection>
+            </div>
+
+            {/* 6. Financial Details — detailed drill-down, collapsed by default */}
+            <div className="animate-slide-up" style={{ animationDelay: "500ms", animationFillMode: "both" }}>
+              <CollapsibleSection
+                title="Financial Details"
+                subtitle="Snapshot, risk windows, subscriptions & debts"
+                defaultOpen={false}
+              >
+                <SnapshotView snapshot={result.snapshot} />
+              </CollapsibleSection>
+            </div>
+
+            {/* 7. Start Over */}
             <div className="text-center pt-4 pb-12 animate-fade-in" style={{ animationDelay: "600ms", animationFillMode: "both" }}>
               <button
                 onClick={handleReset}

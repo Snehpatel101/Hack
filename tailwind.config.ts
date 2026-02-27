@@ -14,7 +14,7 @@ const config: Config = {
         card: "#1e293b",
         "card-hover": "#334155",
         accent: { DEFAULT: "#14b8a6", light: "#2dd4bf", dark: "#0d9488" },
-        warm: { DEFAULT: "#0ea5e9", light: "#22d3ee", dark: "#0284c7" },
+        cool: { DEFAULT: "#0ea5e9", light: "#22d3ee", dark: "#0284c7" },
       },
       animation: {
         "fade-in": "fadeIn 0.5s ease-out",
