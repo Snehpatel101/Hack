@@ -50,6 +50,51 @@ Safety guardrails:
 }
 
 // ---- watsonx.ai integration ----
+
+/** Cache the IAM token so we don't exchange on every request */
+let cachedIAMToken: { token: string; expiresAt: number } | null = null;
+
+/**
+ * Exchange an IBM Cloud API key for a short-lived IAM Bearer token.
+ * watsonx.ai requires this — you cannot use the API key directly.
+ */
+async function getIAMToken(apiKey: string): Promise<string | null> {
+  // Return cached token if still valid (with 60s buffer)
+  if (cachedIAMToken && Date.now() < cachedIAMToken.expiresAt - 60_000) {
+    return cachedIAMToken.token;
+  }
+
+  try {
+    const response = await fetch("https://iam.cloud.ibm.com/identity/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: `grant_type=urn:ibm:params:oauth:grant-type:apikey&apikey=${encodeURIComponent(apiKey)}`,
+    });
+
+    if (!response.ok) {
+      console.error("[chat] IAM token exchange failed:", response.status);
+      return null;
+    }
+
+    const data = await response.json();
+    const token = data.access_token;
+    const expiresIn = data.expires_in || 3600; // default 1hr
+
+    if (token) {
+      cachedIAMToken = {
+        token,
+        expiresAt: Date.now() + expiresIn * 1000,
+      };
+      return token;
+    }
+
+    return null;
+  } catch (err) {
+    console.error("[chat] IAM token exchange error:", err);
+    return null;
+  }
+}
+
 async function callWatsonx(
   systemPrompt: string,
   history: ChatMessage[],
@@ -58,36 +103,50 @@ async function callWatsonx(
   const apiKey = process.env.WATSONX_API_KEY;
   const projectId = process.env.WATSONX_PROJECT_ID;
 
-  if (!apiKey || !projectId) return null;
+  if (!apiKey) return null;
 
+  // Exchange API key for IAM Bearer token
+  const bearerToken = await getIAMToken(apiKey);
+  if (!bearerToken) return null;
+
+  // Use the Chat API (not deprecated text/generation)
   const watsonxUrl =
     process.env.WATSONX_URL ||
-    "https://us-south.ml.cloud.ibm.com/ml/v1/text/generation?version=2024-05-31";
+    "https://us-south.ml.cloud.ibm.com/ml/v1/text/chat?version=2024-05-31";
 
-  // Build a single prompt string for watsonx text generation
-  let prompt = `<|system|>\n${systemPrompt}\n<|end|>\n`;
+  // Build messages array for the chat API
+  const messages: { role: string; content: string }[] = [
+    { role: "system", content: systemPrompt },
+  ];
+
   for (const msg of history) {
-    const role = msg.role === "user" ? "user" : "assistant";
-    prompt += `<|${role}|>\n${msg.content}\n<|end|>\n`;
+    messages.push({
+      role: msg.role === "user" ? "user" : "assistant",
+      content: msg.content,
+    });
   }
-  prompt += `<|user|>\n${userMessage}\n<|end|>\n<|assistant|>\n`;
+
+  messages.push({ role: "user", content: userMessage });
 
   try {
+    const body: Record<string, unknown> = {
+      model_id: process.env.WATSONX_MODEL_ID || "ibm/granite-3-3-8b-instruct",
+      messages,
+      max_tokens: 500,
+      temperature: 0.3,
+    };
+
+    if (projectId) {
+      body.project_id = projectId;
+    }
+
     const response = await fetch(watsonxUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
+        Authorization: `Bearer ${bearerToken}`,
       },
-      body: JSON.stringify({
-        model_id: process.env.WATSONX_MODEL_ID || "ibm/granite-3-8b-instruct",
-        input: prompt,
-        parameters: {
-          max_new_tokens: 500,
-          temperature: 0.3,
-        },
-        project_id: projectId,
-      }),
+      body: JSON.stringify(body),
     });
 
     if (!response.ok) {
@@ -100,11 +159,12 @@ async function callWatsonx(
     }
 
     const data = await response.json();
-    const generatedText =
-      data?.results?.[0]?.generated_text || data?.generated_text;
 
-    if (generatedText && typeof generatedText === "string") {
-      return generatedText.trim();
+    // Chat API response format: data.choices[0].message.content
+    const content = data?.choices?.[0]?.message?.content;
+
+    if (content && typeof content === "string") {
+      return content.trim();
     }
 
     console.warn("[chat] watsonx.ai returned empty response");
