@@ -332,6 +332,15 @@ const FIELD_RULES: FieldRule[] = [
       { regex: /settlement/i, confidence: 0.85, label: "partial match 'settlement'" },
       { regex: /value[\s._-]*date/i, confidence: 0.85, label: "partial match 'value date'" },
       { regex: /posting/i, confidence: 0.82, label: "partial match 'posting'" },
+      { regex: /^when$/i, confidence: 0.80, label: "header match 'when'" },
+      { regex: /^trans[\s_-]*dt$/i, confidence: 0.85, label: "header match 'trans dt'" },
+      { regex: /^txn[\s_-]*date$/i, confidence: 0.90, label: "header match 'txn date'" },
+      { regex: /^booked$/i, confidence: 0.85, label: "header match 'booked'" },
+      { regex: /^processed$/i, confidence: 0.82, label: "header match 'processed'" },
+      { regex: /^created[\s_-]*(at|date)?$/i, confidence: 0.80, label: "header match 'created/created_at'" },
+      { regex: /^timestamp$/i, confidence: 0.78, label: "header match 'timestamp'" },
+      { regex: /^day$/i, confidence: 0.75, label: "header match 'day'" },
+      { regex: /date|dt$/i, confidence: 0.70, label: "catch-all partial match 'date' or 'dt'" },
     ],
     contentValidator: (values) => {
       const parseable = values.filter((v) => v.trim() !== "").filter((v) => parseDateFlex(v) !== null);
@@ -352,6 +361,16 @@ const FIELD_RULES: FieldRule[] = [
       { regex: /^reference$/i, confidence: 0.80, label: "header match 'reference'" },
       { regex: /^name$/i, confidence: 0.80, label: "header match 'name'" },
       { regex: /desc|memo|narrative/i, confidence: 0.80, label: "partial match description-like" },
+      { regex: /^transaction[\s_-]*description$/i, confidence: 0.93, label: "header match 'transaction description'" },
+      { regex: /^trans[\s_-]*desc$/i, confidence: 0.88, label: "header match 'trans desc'" },
+      { regex: /^remark/i, confidence: 0.85, label: "header match 'remark/remarks'" },
+      { regex: /^note/i, confidence: 0.80, label: "header match 'note/notes'" },
+      { regex: /^label$/i, confidence: 0.78, label: "header match 'label'" },
+      { regex: /^vendor$/i, confidence: 0.85, label: "header match 'vendor'" },
+      { regex: /^counterparty$/i, confidence: 0.85, label: "header match 'counterparty'" },
+      { regex: /^recipient$/i, confidence: 0.80, label: "header match 'recipient'" },
+      { regex: /^sender$/i, confidence: 0.78, label: "header match 'sender'" },
+      { regex: /^title$/i, confidence: 0.75, label: "header match 'title'" },
     ],
     contentValidator: (values) => {
       const nonEmpty = values.filter((v) => v.trim() !== "");
@@ -368,6 +387,14 @@ const FIELD_RULES: FieldRule[] = [
       { regex: /^sum$/i, confidence: 0.85, label: "header match 'sum'" },
       { regex: /^total$/i, confidence: 0.85, label: "header match 'total'" },
       { regex: /^value$/i, confidence: 0.80, label: "header match 'value'" },
+      { regex: /^transaction[\s_-]*amount$/i, confidence: 0.93, label: "header match 'transaction amount'" },
+      { regex: /^price$/i, confidence: 0.80, label: "header match 'price'" },
+      { regex: /^cost$/i, confidence: 0.78, label: "header match 'cost'" },
+      { regex: /^fee$/i, confidence: 0.75, label: "header match 'fee'" },
+      { regex: /^net$/i, confidence: 0.78, label: "header match 'net'" },
+      { regex: /^gross$/i, confidence: 0.78, label: "header match 'gross'" },
+      { regex: /^money$/i, confidence: 0.72, label: "header match 'money'" },
+      { regex: /amount|amt|sum|total/i, confidence: 0.70, label: "catch-all partial match 'amount/amt/sum/total'" },
     ],
     contentValidator: (values) => {
       const parseable = values.filter((v) => v.trim() !== "").filter((v) => parseAmount(v) !== null);
@@ -383,6 +410,11 @@ const FIELD_RULES: FieldRule[] = [
       { regex: /payment/i, confidence: 0.85, label: "header match 'payment'" },
       { regex: /money[\s._-]*out/i, confidence: 0.90, label: "header match 'money out'" },
       { regex: /^dr$/i, confidence: 0.90, label: "header match 'dr'" },
+      { regex: /^spend$/i, confidence: 0.85, label: "header match 'spend'" },
+      { regex: /^expense$/i, confidence: 0.85, label: "header match 'expense'" },
+      { regex: /^outflow$/i, confidence: 0.88, label: "header match 'outflow'" },
+      { regex: /^paid$/i, confidence: 0.80, label: "header match 'paid'" },
+      { regex: /^deducted$/i, confidence: 0.82, label: "header match 'deducted'" },
     ],
     contentValidator: (values) => {
       const parseable = values.filter((v) => v.trim() !== "").filter((v) => parseAmount(v) !== null);
@@ -396,6 +428,11 @@ const FIELD_RULES: FieldRule[] = [
       { regex: /deposit/i, confidence: 0.90, label: "header match 'deposit'" },
       { regex: /money[\s._-]*in/i, confidence: 0.90, label: "header match 'money in'" },
       { regex: /^cr$/i, confidence: 0.90, label: "header match 'cr'" },
+      { regex: /^income$/i, confidence: 0.85, label: "header match 'income'" },
+      { regex: /^received$/i, confidence: 0.82, label: "header match 'received'" },
+      { regex: /^inflow$/i, confidence: 0.88, label: "header match 'inflow'" },
+      { regex: /^refund$/i, confidence: 0.80, label: "header match 'refund'" },
+      { regex: /^earned$/i, confidence: 0.80, label: "header match 'earned'" },
     ],
     contentValidator: (values) => {
       const parseable = values.filter((v) => v.trim() !== "").filter((v) => parseAmount(v) !== null);
@@ -411,6 +448,11 @@ const FIELD_RULES: FieldRule[] = [
       { regex: /^class$/i, confidence: 0.85, label: "header match 'class'" },
       { regex: /^group$/i, confidence: 0.80, label: "header match 'group'" },
       { regex: /^tag$/i, confidence: 0.80, label: "header match 'tag'" },
+      { regex: /^spending[\s_-]*category$/i, confidence: 0.90, label: "header match 'spending category'" },
+      { regex: /^expense[\s_-]*type$/i, confidence: 0.88, label: "header match 'expense type'" },
+      { regex: /^budget[\s_-]*category$/i, confidence: 0.88, label: "header match 'budget category'" },
+      { regex: /^classification$/i, confidence: 0.82, label: "header match 'classification'" },
+      { regex: /^sector$/i, confidence: 0.75, label: "header match 'sector'" },
     ],
     // Reject columns where values look like transaction types ("debit"/"credit")
     contentValidator: (values) => {
@@ -823,23 +865,102 @@ export function parseAmount(val: string): number | null {
  * the application.
  */
 const CATEGORY_RULES: [RegExp, string][] = [
-  [/rent|mortgage|lease/i, "housing"],
-  [/electric|power|gas\s*co|water|sewer|utility|utilities/i, "utilities"],
-  [/internet|comcast|spectrum|att|xfinity/i, "internet"],
-  [/t-mobile|verizon|at&t|sprint|phone/i, "phone"],
-  [/grocery|kroger|walmart supercenter|aldi|heb|publix|safeway|trader|whole\s*foods/i, "groceries"],
-  [/gas\s*station|shell|chevron|exxon|bp|fuel/i, "gas"],
-  [/netflix|hulu|disney|spotify|apple\s*music|youtube\s*premium|hbo|paramount|peacock/i, "subscription"],
-  [/planet\s*fitness|gym|la\s*fitness|ymca|crossfit|peloton/i, "subscription"],
-  [/amazon\s*prime/i, "subscription"],
-  [/starbucks|coffee|mcdonald|restaurant|doordash|uber\s*eats|grubhub/i, "dining"],
-  [/target|walmart|costco|amazon(?!\s*prime)/i, "shopping"],
-  [/visa|mastercard|min\s*payment|chase|capital\s*one|amex/i, "debt_payment"],
-  [/sofi|lending|loan|student\s*loan/i, "debt_payment"],
-  [/direct\s*deposit|payroll|employer|paycheck/i, "income"],
-  [/transfer|zelle|venmo|cashapp/i, "transfer"],
-  [/insurance|geico|state\s*farm|progressive/i, "insurance"],
-  [/medical|pharmacy|doctor|hospital|cvs|walgreens/i, "medical"],
+  // ── Food Delivery (before dining so "uber eats" doesn't match generic "uber") ──
+  [/doordash|uber\s*eats|grubhub|postmates|instacart|shipt|gopuff/i, "food_delivery"],
+
+  // ── Housing / Rent ──
+  [/rent|landlord|property\s*management|apartment|lease\s*payment|mortgage|housing/i, "housing"],
+
+  // ── Utilities ──
+  [/electric|power|gas\s*co|water|sewer|utility|utilities|trash|garbage|waste\s*management|recology/i, "utilities"],
+
+  // ── Internet ──
+  [/internet|comcast|spectrum|att\b|xfinity|centurylink|frontier\s*comm|cox\s*comm|hughesnet|starlink/i, "internet"],
+
+  // ── Phone ──
+  [/t-mobile|verizon|at&t|sprint|phone\s*bill|cricket|boost\s*mobile|mint\s*mobile|visible|us\s*cellular/i, "phone"],
+
+  // ── Insurance ──
+  [/insurance|geico|state\s*farm|progressive|allstate|liberty\s*mutual|nationwide|usaa|farmers|aetna|cigna|united\s*health|anthem|blue\s*cross|humana|metlife|prudential/i, "insurance"],
+
+  // ── Medical ──
+  [/medical|pharmacy|doctor|hospital|cvs|walgreens|urgent\s*care|clinic|dental|dentist|orthodont|optometr|ophthalmol|chiropractic|physical\s*therapy|quest\s*diagnostics|labcorp|kaiser|planned\s*parenthood|copay|deductible|health\s*care/i, "medical"],
+
+  // ── Education ──
+  [/tuition|university|college|school|udemy|coursera|chegg|textbook|student|pearson|mcgraw|blackboard|canvas\s*lms|learning\s*tree|khan\s*academy|edx|brilliant\.org|duolingo/i, "education"],
+
+  // ── Childcare ──
+  [/daycare|childcare|babysit|nanny|bright\s*horizons|kindercare|preschool|tutor(?!ial)|after\s*school/i, "childcare"],
+
+  // ── Legal ──
+  [/attorney|lawyer|legal\s*service|law\s*firm|notary|court\s*filing|legal\s*zoom|legal\s*shield/i, "legal"],
+
+  // ── Government ──
+  [/\birs\b|state\s*tax|property\s*tax|dmv|court\s*fee|fine\b|permit|license|passport|city\s*of|county\s*of|\.gov\b|government/i, "government"],
+
+  // ── Charity ──
+  [/donation|charity|nonprofit|non-profit|united\s*way|red\s*cross|salvation\s*army|gofundme|church|tithe|offering|habitat\s*for|goodwill/i, "charity"],
+
+  // ── Savings / Investments ──
+  [/savings\s*(?:account|deposit|transfer)|401k|401\(k\)|\bira\b|roth|investment|brokerage|fidelity|vanguard|schwab|e\s*trade|robinhood|acorns|betterment|wealthfront|webull|sofi\s*invest/i, "savings"],
+
+  // ── Groceries (expanded) ──
+  [/grocery|grocer|kroger|walmart\s*(?:supercenter|neighborhood)|aldi|h-?e-?b\b|publix|safeway|trader\s*joe|whole\s*foods|food\s*lion|giant\s*(?:food|eagle)|wegmans|sprouts|winco|piggly\s*wiggly|stop\s*(?:&|and)\s*shop|meijer|market\s*basket|harris\s*teeter|hannaford|food\s*city|ingles|bi-?lo|winn-?dixie|lidl|costco\s*wholesale\s*food|fresh\s*market|stater\s*bros|raleys|vons|albertsons|shoprite|food\s*4\s*less|save-?a-?lot/i, "groceries"],
+
+  // ── Gas / Fuel ──
+  [/gas\s*station|shell|chevron|exxon|bp\b|fuel|sunoco|marathon|valero|circle\s*k|wawa|speedway|racetrac|quiktrip|pilot|flying\s*j|casey|murphy\s*(?:oil|usa)/i, "gas"],
+
+  // ── Fitness (separate category, not subscription) ──
+  [/planet\s*fitness|gym\b|la\s*fitness|ymca|ywca|crossfit|peloton|equinox|orangetheory|orange\s*theory|anytime\s*fitness|24\s*hour\s*fitness|gold'?s?\s*gym|crunch\s*fitness|crunch\s*gym|barre|yoga|pilates|lifetime\s*fitness|snap\s*fitness|pure\s*barre|soul\s*cycle|f45\s*training/i, "fitness"],
+
+  // ── Subscription / Streaming / Digital Services ──
+  [/netflix|hulu|disney\s*\+|disney\s*plus|spotify|apple\s*music|youtube\s*(?:premium|tv)|hbo|paramount\s*\+|paramount\s*plus|peacock|amazon\s*prime|adobe|microsoft\s*365|office\s*365|google\s*(?:storage|one)|icloud|dropbox|dashlane|nordvpn|expressvpn|headspace|calm\s*app|calm\.com|audible|kindle\s*unlimited|skillshare|masterclass|curiosity\s*stream|crunchyroll|funimation|tidal|deezer|sirius|siriusxm|onlyfans|patreon|substack|apple\s*tv|discovery\s*\+|espn\s*\+|starz|showtime|britbox|mubi|criterion/i, "subscription"],
+
+  // ── Dining / Restaurants (expanded, no food delivery) ──
+  [/starbucks|coffee|mcdonald|restaurant|chipotle|wendy'?s|burger\s*king|taco\s*bell|subway|panera|chick-?fil-?a|popeyes|dunkin|domino'?s|pizza\s*hut|papa\s*john|olive\s*garden|applebee|chili'?s|ihop|denny'?s|waffle\s*house|panda\s*express|five\s*guys|shake\s*shack|in-?n-?out|jack\s*in\s*the\s*box|sonic\s*drive|arby'?s|kfc|wingstop|jimmy\s*john|jersey\s*mike|firehouse\s*sub|potbelly|noodles\s*(?:&|and)\s*co|cracker\s*barrel|outback|red\s*lobster|texas\s*roadhouse|buffalo\s*wild\s*wings|hooters|benihana|ruth'?s?\s*chris|capital\s*grille|cheesecake\s*factory|caf[eé]|bistro|diner|grill|pizzeria|bakery|bagel/i, "dining"],
+
+  // ── Travel ──
+  [/airline|airfare|hotel|airbnb|vrbo|booking\.com|expedia|delta\s*air|united\s*air|southwest\s*air|american\s*airlines|jetblue|frontier\s*air|spirit\s*air|marriott|hilton|hyatt|motel|resort|travelocity|kayak|priceline|tsa\b|orbitz|hotwire|trivago|wyndham|best\s*western|radisson|sheraton|westin|courtyard|hampton\s*inn|holiday\s*inn|la\s*quinta|embassy\s*suites|flights?|boarding\s*pass/i, "travel"],
+
+  // ── Transportation (uber but NOT uber eats) ──
+  [/uber(?!\s*eats)|lyft|taxi|cab\b|metro\s*card|subway|bus\s*pass|toll|parking|mta\b|bart\b|septa|cta\b|wmata|amtrak|greyhound|megabus|transit|ride\s*share|lime\s*scooter|bird\s*scooter|citibike/i, "transportation"],
+
+  // ── Automotive ──
+  [/auto\s*repair|mechanic|oil\s*change|tire\b|jiffy\s*lube|meineke|midas\b|autozone|o'?\s*reilly\s*auto|napa\s*auto|advance\s*auto|car\s*wash|smog|dmv\b|registration|valvoline|firestone|goodyear|discount\s*tire|pep\s*boys|maaco|safelite|aaa\b/i, "automotive"],
+
+  // ── Pets ──
+  [/petco|petsmart|vet(?:erinar)?|animal\s*hospital|pet\s*supplies|chewy\.com|chewy\b|bark\s*box|rover\.com|rover\s*pet|pet\s*food|doggy|grooming\s*pet/i, "pets"],
+
+  // ── Clothing / Apparel ──
+  [/nordstrom|macy'?s|old\s*navy|gap\b|zara\b|h&m\b|forever\s*21|tj\s*maxx|marshalls|ross\b|burlington|nike\b|adidas|foot\s*locker|asos\b|shein\b|fashion|uniqlo|banana\s*republic|express\b|american\s*eagle|hollister|abercrombie|lululemon|under\s*armour|puma\b|new\s*balance|skechers|dsw\b|famous\s*footwear/i, "clothing"],
+
+  // ── Electronics ──
+  [/best\s*buy|apple\s*store|micro\s*center|newegg|b&h\s*photo|samsung\s*store|gamestop|game\s*stop|fry'?s\s*electronics/i, "electronics"],
+
+  // ── Home Improvement ──
+  [/home\s*depot|lowe'?s|ace\s*hardware|menards|ikea|bed\s*bath|wayfair|pottery\s*barn|crate\s*(?:&|and)\s*barrel|restoration\s*hardware|home\s*goods|pier\s*1|williams\s*sonoma|west\s*elm|world\s*market|harbor\s*freight|true\s*value|sherwin|benjamin\s*moore/i, "home_improvement"],
+
+  // ── Personal Care ──
+  [/salon|barber|spa\b|nail\b|haircut|beauty|sephora|ulta|waxing|massage|dermatolog|cosmetic|skincare|great\s*clips|supercuts|floyd'?s|drybar|european\s*wax|hand\s*(?:&|and)\s*stone|bath\s*(?:&|and)\s*body/i, "personal_care"],
+
+  // ── Alcohol / Bars ──
+  [/\bbar\b|pub\b|tavern|brewery|liquor|wine\s*(?:shop|store|bar)|beer\b|spirits|total\s*wine|bevmo|abc\s*store|cocktail|nightclub|lounge/i, "alcohol"],
+
+  // ── Entertainment ──
+  [/cinema|movie|theater|theatre|ticketmaster|stubhub|bowling|arcade|amusement|zoo\b|museum|concert|live\s*nation|gaming|steam\b|playstation|xbox|nintendo|regal\s*cinema|amc\s*theat|cinemark|fandango|dave\s*(?:&|and)\s*buster|top\s*golf|escape\s*room|laser\s*tag|mini\s*golf|roller\s*coaster|theme\s*park|water\s*park|six\s*flags|cedar\s*point|seaworld/i, "entertainment"],
+
+  // ── Shopping (general, after more specific retail categories) ──
+  [/target|walmart|costco|amazon(?!\s*prime)|ebay|etsy|wish\.com|aliexpress|shein|wayfair|sam'?s\s*club|bj'?s\s*wholesale|dollar\s*(?:tree|general)|five\s*below|big\s*lots|overstock|mercari|poshmark|offerup|facebook\s*market/i, "shopping"],
+
+  // ── Debt Payment ──
+  [/visa\s*payment|mastercard\s*payment|min\s*payment|chase\s*(?:card|payment)|capital\s*one\s*(?:card|payment)|amex\s*(?:card|payment)|credit\s*card\s*payment|discover\s*(?:card|payment)|citi\s*(?:card|payment)|wells\s*fargo\s*(?:card|payment)/i, "debt_payment"],
+  [/sofi\s*loan|lending|loan\s*payment|student\s*loan|navient|nelnet|fedloan|great\s*lakes|mohela|aidvantage/i, "debt_payment"],
+
+  // ── Income ──
+  [/direct\s*deposit|payroll|employer|paycheck|salary|wages|commission|bonus\s*pay|stipend|freelance\s*pay|ach\s*(?:credit|deposit)/i, "income"],
+
+  // ── Transfer ──
+  [/transfer|zelle|venmo|cashapp|cash\s*app|paypal\s*transfer|wire\s*transfer|ach\s*transfer|apple\s*cash|google\s*pay\s*transfer/i, "transfer"],
 ];
 
 /**

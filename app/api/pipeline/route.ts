@@ -21,7 +21,7 @@ import {
   WorkflowTrace,
   CopilotResponse,
 } from "@/lib/types";
-import { parseCSV, buildSnapshot } from "@/lib/parser";
+import { buildSnapshot } from "@/lib/parser";
 import { normalizeFinancialData } from "@/lib/normalizer";
 import { getEligibleActions } from "@/lib/actions";
 import { solveQUBO } from "@/lib/qubo";
@@ -149,47 +149,22 @@ export async function POST(request: NextRequest) {
         trimmed.startsWith("[") || trimmed.startsWith("{") ? "json" : "csv";
     }
 
-    // Parse transactions
-    let transactions: RawTransaction[];
+    // Parse transactions using universal normalizer as the sole parser
+    const normResult = normalizeFinancialData(text, fileType);
 
-    if (fileType === "csv") {
-      try {
-        transactions = parseCSV(text);
-      } catch (err: unknown) {
-        const message =
-          err instanceof Error ? err.message : "Failed to parse CSV.";
-        return NextResponse.json({ error: message }, { status: 422 });
-      }
-    } else {
-      try {
-        const parsed = JSON.parse(text);
-        if (Array.isArray(parsed)) {
-          transactions = parsed as RawTransaction[];
-        } else if (parsed && Array.isArray(parsed.transactions)) {
-          transactions = parsed.transactions as RawTransaction[];
-        } else {
-          return NextResponse.json(
-            {
-              error:
-                "JSON must be an array of transactions or an object with a 'transactions' array.",
-            },
-            { status: 422 }
-          );
-        }
-      } catch {
-        return NextResponse.json(
-          { error: "Invalid JSON in uploaded file." },
-          { status: 422 }
-        );
-      }
-    }
-
-    if (transactions.length === 0) {
+    if (normResult.normalizedTransactions.length === 0) {
       return NextResponse.json(
-        { error: "No valid transactions found in the uploaded file." },
+        { error: normResult.warnings.length > 0 ? normResult.warnings.join("; ") : "No valid transactions found in the uploaded file." },
         { status: 422 }
       );
     }
+
+    const transactions: RawTransaction[] = normResult.normalizedTransactions.map(nt => ({
+      date: nt.dateISO,
+      description: nt.description,
+      amount: nt.amountSigned,
+      category: nt.category !== "uncategorized" ? nt.category : undefined,
+    }));
 
     // Parse profile (optional)
     let profile: {
@@ -224,25 +199,11 @@ export async function POST(request: NextRequest) {
     }
 
     traceSteps.push({
-      tool: "parse-upload",
-      input_summary: `${fileType.toUpperCase()} file: "${file.name}" (${text.length} bytes)`,
-      output_summary: `Parsed ${transactions.length} transactions`,
+      tool: "universal-normalizer",
+      input_summary: `${fileType.toUpperCase()} file: "${file.name}" (${text.length} bytes), schema inference on ${normResult.schemaMap.length} columns`,
+      output_summary: `${transactions.length} transactions parsed, ${Object.keys(normResult.categoryTotals).length} categories, ${normResult.warnings.length} warnings`,
       timestamp: new Date(stepParseStart).toISOString(),
       duration_ms: Date.now() - stepParseStart,
-    });
-
-    // ============================================================
-    // STEP 1b: Universal normalizer (schema inference + category totals)
-    // ============================================================
-    const stepNormStart = Date.now();
-    const normResult = normalizeFinancialData(text, fileType);
-
-    traceSteps.push({
-      tool: "universal-normalizer",
-      input_summary: `${fileType.toUpperCase()} → schema inference on ${normResult.schemaMap.length} columns`,
-      output_summary: `${normResult.normalizedTransactions.length} txns normalized, ${Object.keys(normResult.categoryTotals).length} categories, ${normResult.warnings.length} warnings`,
-      timestamp: new Date(stepNormStart).toISOString(),
-      duration_ms: Date.now() - stepNormStart,
     });
 
     // ============================================================

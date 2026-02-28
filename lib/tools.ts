@@ -18,7 +18,8 @@ import {
   WorkflowTrace,
   CopilotResponse,
 } from "./types";
-import { parseCSV, buildSnapshot } from "./parser";
+import { buildSnapshot } from "./parser";
+import { normalizeFinancialData } from "./normalizer";
 import { getEligibleActions } from "./actions";
 import { solveQUBO } from "./qubo";
 import { SYSTEM_PROMPT, DEVELOPER_PROMPT, buildUserMessage } from "./prompts";
@@ -93,20 +94,22 @@ export function parseUpload(
   file: string,
   fileType: "csv" | "json"
 ): RawTransaction[] {
-  if (fileType === "csv") {
-    return parseCSV(file);
+  const normResult = normalizeFinancialData(file, fileType);
+
+  if (normResult.normalizedTransactions.length === 0) {
+    throw new Error(
+      normResult.warnings.length > 0
+        ? `Could not parse file: ${normResult.warnings[0]}`
+        : "No valid transactions found in the uploaded file."
+    );
   }
 
-  const parsed = JSON.parse(file);
-  if (Array.isArray(parsed)) {
-    return parsed as RawTransaction[];
-  }
-  if (parsed.transactions && Array.isArray(parsed.transactions)) {
-    return parsed.transactions as RawTransaction[];
-  }
-  throw new Error(
-    "JSON input must be an array of transactions or an object with a 'transactions' key."
-  );
+  return normResult.normalizedTransactions.map(nt => ({
+    date: nt.dateISO,
+    description: nt.description,
+    amount: nt.amountSigned,
+    category: nt.category !== "uncategorized" ? nt.category : undefined,
+  }));
 }
 
 // ============================================================
