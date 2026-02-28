@@ -16,24 +16,18 @@ interface QUBOVisualizationProps {
 // ---------------------------------------------------------------------------
 // Solver display names
 // ---------------------------------------------------------------------------
-const SOLVER_LABELS: Record<QUBOResult["solver_used"], string> = {
-  exact_enumeration: "Exact (all combos tested)",
-  simulated_annealing: "Simulated Annealing",
+const SOLVER_LABELS: Record<QUBOResult["solver"]["solver_type"], string> = {
+  qubo_sim: "QUBO Exact (2\u207F)",
   greedy_fallback: "Greedy Fallback",
 };
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-function formatIterations(n: number): string {
-  return n.toLocaleString();
-}
-
-function isInfeasible(result: QUBOResult): boolean {
-  return (
-    (result.objective_value > 1000 || result.selected_action_ids.length === 0) &&
-    result.solver_used === "greedy_fallback"
-  );
+function formatCash(n: number): string {
+  const abs = Math.abs(n);
+  if (abs >= 1000) return `$${(abs / 1000).toFixed(1)}k`;
+  return `$${abs.toFixed(0)}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -84,12 +78,114 @@ function ActionChip({ action }: { action: SelectedAction }) {
   );
 }
 
+/** Expandable "Why These Actions?" section. */
+function WhyTheseActions({
+  explain,
+  allActions,
+  lang = "en",
+}: {
+  explain: QUBOResult["explain"];
+  allActions: SelectedAction[];
+  lang?: string;
+}) {
+  const [open, setOpen] = useState(false);
+
+  const actionNameMap = new Map(allActions.map((a) => [a.id, a.name]));
+
+  return (
+    <div className="mt-5 rounded-lg border border-white/[0.06] bg-white/[0.03] backdrop-blur-sm">
+      <button
+        type="button"
+        onClick={() => setOpen((prev) => !prev)}
+        className="flex w-full items-center justify-between px-4 py-2.5 text-left text-xs font-medium text-slate-400 hover:text-slate-300 transition-colors"
+        aria-expanded={open}
+      >
+        <span className="flex items-center gap-1.5">
+          <InfoIcon />
+          {t(lang, "whyTheseActions")}
+        </span>
+        <ChevronIcon open={open} />
+      </button>
+
+      {open && (
+        <div className="px-4 pb-4 text-xs leading-relaxed text-slate-400 space-y-4 animate-fade-in">
+          {/* Top reasons */}
+          {explain.top_reasons.length > 0 && (
+            <ul className="list-disc list-inside space-y-1">
+              {explain.top_reasons.map((reason, i) => (
+                <li key={i}>{reason}</li>
+              ))}
+            </ul>
+          )}
+
+          {/* Action contributions */}
+          {explain.action_contributions.length > 0 && (
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 mb-2">
+                {t(lang, "valueBreakdown")}
+              </p>
+              <div className="space-y-1.5">
+                {explain.action_contributions.map((ac) => (
+                  <div
+                    key={ac.id}
+                    className="flex items-center justify-between gap-2 rounded-md bg-white/[0.03] border border-white/[0.04] px-3 py-1.5"
+                  >
+                    <span className="text-slate-300 truncate">
+                      {actionNameMap.get(ac.id) ?? ac.id}
+                    </span>
+                    <div className="flex items-center gap-3 text-[11px] text-slate-500 shrink-0">
+                      <span>
+                        {t(lang, "cashComponent")}:{" "}
+                        <span className="text-cyan-400">
+                          {ac.cash_component > 0 ? "+" : ""}
+                          {ac.cash_component.toFixed(1)}
+                        </span>
+                      </span>
+                      <span>
+                        {t(lang, "riskComponent")}:{" "}
+                        <span className="text-cyan-400">
+                          {ac.risk_component > 0 ? "+" : ""}
+                          {ac.risk_component.toFixed(1)}
+                        </span>
+                      </span>
+                      {ac.penalties !== 0 && (
+                        <span>
+                          {t(lang, "penalties")}:{" "}
+                          <span className="text-amber-400">
+                            {ac.penalties.toFixed(1)}
+                          </span>
+                        </span>
+                      )}
+                      <span className="text-slate-300 font-medium">
+                        = {ac.value.toFixed(1)}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Constraint notes */}
+          {explain.constraint_notes.length > 0 && (
+            <div className="border-t border-white/[0.06] pt-3 text-[11px] text-slate-500 space-y-1">
+              {explain.constraint_notes.map((note, i) => (
+                <p key={i}>{note}</p>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /** Expandable "How does this work?" section. */
 function HowItWorks({ lang = "en" }: { lang?: string }) {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="mt-5 rounded-lg border border-white/[0.06] bg-white/[0.03] backdrop-blur-sm">
+    <div className="mt-3 rounded-lg border border-white/[0.06] bg-white/[0.03] backdrop-blur-sm">
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
@@ -106,18 +202,22 @@ function HowItWorks({ lang = "en" }: { lang?: string }) {
       {open && (
         <div className="px-4 pb-4 text-xs leading-relaxed text-slate-400 space-y-3 animate-fade-in">
           <p>
-            The QUBO (Quadratic Unconstrained Binary Optimization) formulation
+            The optimization is <strong className="text-slate-300">Backed by Math</strong>.
+            A QUBO (Quadratic Unconstrained Binary Optimization) formulation
             treats each financial action as a binary variable (do it or skip it).
             The optimizer finds the combination that maximizes impact while
-            respecting your time budget and minimum balance buffer.
+            respecting your time budget, cash constraints, and minimum balance buffer.
           </p>
           <ul className="list-disc list-inside space-y-1 text-slate-500">
-            <li>Solved on classical simulator today</li>
             <li>
-              Formulation is quantum hardware-ready (D-Wave, IBM Qiskit
-              compatible)
+              QUBO formulation encodes goals, penalties, and synergies into a
+              single objective function
             </li>
-            <li>Fallback solvers ensure results even with many actions</li>
+            <li>
+              Exact solver evaluates all 2&#x207F; combinations for small action
+              sets; greedy fallback handles larger sets
+            </li>
+            <li>Conflict and synergy relationships between actions are respected</li>
           </ul>
         </div>
       )}
@@ -178,14 +278,13 @@ export default function QUBOVisualization({
   const totalActions = allActions.length;
   const selectedCount = quboResult.selected_action_ids.length;
   const hasSelections = selectedCount > 0;
-  const infeasible = isInfeasible(quboResult);
 
-  // Build solver subtitle (includes iterations when available)
-  const solverName = SOLVER_LABELS[quboResult.solver_used];
-  const iterationsLabel =
-    quboResult.iterations !== undefined
-      ? `(${formatIterations(quboResult.iterations)} iterations)`
-      : null;
+  const solverType = quboResult.solver.solver_type;
+  const solverName = SOLVER_LABELS[solverType];
+  const timeLabel = `${quboResult.solver.time_ms}ms`;
+
+  const cashImpact = quboResult.metrics.estimated_monthly_cash_impact;
+  const bufferOk = quboResult.metrics.buffer_respected;
 
   return (
     <div className="glass-card p-6 card-glow animate-fade-in">
@@ -199,13 +298,13 @@ export default function QUBOVisualization({
             {t(lang, "quboDesc")}
           </p>
         </div>
-        <span className="bg-violet-500/15 text-violet-400 text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap">
-          {t(lang, "quantumInspired")}
+        <span className="bg-gradient-to-r from-violet-500/20 to-purple-500/20 text-violet-300 text-xs px-2.5 py-0.5 rounded-full font-medium whitespace-nowrap border border-violet-500/30">
+          {t(lang, "backedByMath")}
         </span>
       </div>
 
       {/* ---- Key Metrics Row ---- */}
-      <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-3">
         {/* Actions Selected */}
         <MetricCard label={t(lang, "actionsSelected")}>
           <span className={hasSelections ? "text-cyan-400" : "text-red-400"}>
@@ -218,26 +317,64 @@ export default function QUBOVisualization({
         </MetricCard>
 
         {/* Solver */}
-        <MetricCard label={t(lang, "solver")} sublabel={iterationsLabel ?? undefined}>
+        <MetricCard label={t(lang, "solver")} sublabel={timeLabel}>
           <span className="text-slate-200 text-sm">{solverName}</span>
         </MetricCard>
 
         {/* Optimization Score */}
-        <MetricCard label={t(lang, "optimizationScore")} sublabel={t(lang, "lowerBetter")}>
+        <MetricCard
+          label={t(lang, "optimizationScore")}
+          sublabel={t(lang, "lowerBetter")}
+        >
           <span className="text-cyan-400">
-            {Math.abs(quboResult.objective_value).toFixed(1)}
+            {Math.abs(quboResult.score.optimization_score).toFixed(1)}
+          </span>
+        </MetricCard>
+
+        {/* Monthly Impact */}
+        <MetricCard label={t(lang, "monthlyImpact")}>
+          <span className={cashImpact >= 0 ? "text-cyan-400" : "text-red-400"}>
+            {cashImpact >= 0 ? "+" : "-"}
+            {formatCash(cashImpact)}/mo
           </span>
         </MetricCard>
       </div>
 
-      {/* ---- Infeasible State ---- */}
-      {infeasible && (
-        <div className="mt-4 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs leading-relaxed text-amber-300/90">
-          Constraints were too tight for full optimization. The greedy fallback
-          selected the highest-impact actions that fit your budget. Consider
-          increasing your available time to unlock more savings.
+      {/* ---- Constraint Status ---- */}
+      <div className="mt-5">
+        <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500 mb-2">
+          {t(lang, "constraintStatus")}
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          {/* Effort */}
+          <div className="flex items-center gap-2 rounded-lg bg-white/[0.03] border border-white/[0.06] px-3 py-2">
+            <span className="text-xs text-slate-500">{t(lang, "effortBudget")}</span>
+            <span className="ml-auto text-xs font-medium text-slate-300">
+              {quboResult.metrics.effort_minutes_used} {t(lang, "minUsed")}
+            </span>
+          </div>
+
+          {/* Upfront Cash */}
+          <div className="flex items-center gap-2 rounded-lg bg-white/[0.03] border border-white/[0.06] px-3 py-2">
+            <span className="text-xs text-slate-500">{t(lang, "upfrontCash")}</span>
+            <span className="ml-auto text-xs font-medium text-slate-300">
+              ${quboResult.metrics.upfront_cash_used.toLocaleString()} used
+            </span>
+          </div>
+
+          {/* Buffer */}
+          <div className="flex items-center gap-2 rounded-lg bg-white/[0.03] border border-white/[0.06] px-3 py-2">
+            <span className="text-xs text-slate-500">{t(lang, "cashBuffer")}</span>
+            <span
+              className={`ml-auto text-xs font-medium ${
+                bufferOk ? "text-emerald-400" : "text-red-400"
+              }`}
+            >
+              {bufferOk ? `${t(lang, "respected")} \u2713` : `${t(lang, "violated")} \u2717`}
+            </span>
+          </div>
         </div>
-      )}
+      </div>
 
       {/* ---- Selected Actions ---- */}
       <div className="mt-5">
@@ -270,6 +407,15 @@ export default function QUBOVisualization({
           </div>
         )}
       </div>
+
+      {/* ---- Why These Actions? (expandable, collapsed by default) ---- */}
+      {hasSelections && (
+        <WhyTheseActions
+          explain={quboResult.explain}
+          allActions={allActions}
+          lang={lang}
+        />
+      )}
 
       {/* ---- How It Works (expandable) ---- */}
       <HowItWorks lang={lang} />

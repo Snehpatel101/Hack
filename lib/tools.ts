@@ -11,6 +11,7 @@ import {
   DebtInfo,
   SelectedAction,
   QUBOInput,
+  QUBOActionInput,
   QUBOResult,
   WeeklyPlan,
   WeeklyPlanAction,
@@ -359,10 +360,18 @@ export interface QUBOOptimizeResult {
   total_estimated_savings: [number, number];
 }
 
+function mapGoalToQUBO(goal: string): QUBOInput["goal"] {
+  switch (goal) {
+    case "debt": return "pay_down_debt";
+    case "emergency": return "build_emergency_fund";
+    case "stability":
+    default: return "stabilize_cashflow";
+  }
+}
+
 export function quboOptimizeActions(
   snapshot: FinancialSnapshot
 ): QUBOOptimizeResult {
-  // Get eligible actions and convert to SelectedAction with priority
   const eligible = getEligibleActions(snapshot);
   const actions: SelectedAction[] = eligible.map((a, i) => ({
     ...a,
@@ -372,47 +381,55 @@ export function quboOptimizeActions(
   // Determine required actions
   const requiredIds: string[] = [];
   if (snapshot.debts.length > 0) {
-    requiredIds.push("automate_min_payments");
+    if (actions.some(a => a.id === "automate_min_payments")) {
+      requiredIds.push("automate_min_payments");
+    }
   }
-  const hasHighOrCriticalRisk = snapshot.risk_windows.some(
-    (rw) => rw.risk_level === "high" || rw.risk_level === "critical"
-  );
-  if (hasHighOrCriticalRisk) {
-    requiredIds.push("set_overdraft_alert");
+  if (snapshot.risk_windows.some(rw => rw.risk_level === "high" || rw.risk_level === "critical")) {
+    if (actions.some(a => a.id === "set_overdraft_alert")) {
+      requiredIds.push("set_overdraft_alert");
+    }
   }
 
-  // Filter required IDs to only those present in the eligible actions
-  const validRequiredIds = requiredIds.filter((id) =>
-    actions.some((a) => a.id === id)
-  );
+  // Convert to QUBOActionInput[]
+  const quboActions: QUBOActionInput[] = actions.map(a => ({
+    id: a.id,
+    label: a.name,
+    effort_minutes: a.effort_minutes,
+    upfront_cash_cost: a.upfront_cash_cost,
+    monthly_cashflow_delta: a.cash_buffer_effect,
+    risk_reduction_score: a.risk_reduction,
+    eligibility: true,
+    conflicts_with: a.conflicts_with,
+    synergy_with: a.synergy_with,
+  }));
 
   const quboInput: QUBOInput = {
-    actions,
-    effort_budget_minutes: 120,
-    min_cash_buffer: 100,
-    current_balance: snapshot.checking_balance,
-    required_action_ids: validRequiredIds,
+    goal: mapGoalToQUBO(snapshot.goal),
+    constraints: {
+      max_effort_minutes_week: 120,
+      max_upfront_cash_week: 200,
+      must_keep_balance_at_least: 100,
+    },
+    snapshot: {
+      starting_balance: snapshot.checking_balance,
+      monthly_income_est: snapshot.monthly_income,
+      monthly_essential_spend_est: snapshot.monthly_spending.essentials,
+      risk_flags: snapshot.risk_windows
+        .filter(rw => rw.risk_level === "critical" || rw.risk_level === "high")
+        .map(rw => rw.description),
+    },
+    actions: quboActions,
+    required_action_ids: requiredIds,
   };
 
-  const quboResult = solveQUBO(quboInput, snapshot.goal);
+  const quboResult = solveQUBO(quboInput);
 
-  const selectedActions = actions.filter((a) =>
-    quboResult.selected_action_ids.includes(a.id)
-  );
+  const selectedActions = actions.filter(a => quboResult.selected_action_ids.includes(a.id));
 
-  const totalEffort = selectedActions.reduce(
-    (sum, a) => sum + a.effort_minutes,
-    0
-  );
-
-  const totalSavingsLow = selectedActions.reduce(
-    (sum, a) => sum + a.estimated_monthly_impact[0],
-    0
-  );
-  const totalSavingsHigh = selectedActions.reduce(
-    (sum, a) => sum + a.estimated_monthly_impact[1],
-    0
-  );
+  const totalEffort = selectedActions.reduce((sum, a) => sum + a.effort_minutes, 0);
+  const totalSavingsLow = selectedActions.reduce((sum, a) => sum + a.estimated_monthly_impact[0], 0);
+  const totalSavingsHigh = selectedActions.reduce((sum, a) => sum + a.estimated_monthly_impact[1], 0);
 
   return {
     qubo_result: quboResult,

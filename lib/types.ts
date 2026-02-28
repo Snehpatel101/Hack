@@ -97,6 +97,9 @@ export interface Action {
   risk_reduction: number; // 0-10
   effort_minutes: number;
   cash_buffer_effect: number;
+  upfront_cash_cost: number;
+  conflicts_with: string[];
+  synergy_with: string[];
   eligibility: (snapshot: FinancialSnapshot) => boolean;
   goal_weights: { stability: number; debt: number; emergency: number };
 }
@@ -109,24 +112,79 @@ export interface SelectedAction {
   risk_reduction: number;
   effort_minutes: number;
   cash_buffer_effect: number;
+  upfront_cash_cost: number;
+  conflicts_with: string[];
+  synergy_with: string[];
   goal_weights: { stability: number; debt: number; emergency: number };
   priority: number;
 }
 
 // ---- QUBO Types ----
+export interface QUBOActionInput {
+  id: string;
+  label: string;
+  effort_minutes: number;
+  upfront_cash_cost: number;
+  monthly_cashflow_delta: number;
+  risk_reduction_score: number;
+  eligibility: boolean;
+  conflicts_with: string[];
+  synergy_with: string[];
+}
+
 export interface QUBOInput {
-  actions: SelectedAction[];
-  effort_budget_minutes: number;
-  min_cash_buffer: number;
-  current_balance: number;
-  required_action_ids: string[]; // must-select (e.g. minimum payments)
+  goal: "stabilize_cashflow" | "pay_down_debt" | "build_emergency_fund";
+  constraints: {
+    max_effort_minutes_week: number;
+    max_upfront_cash_week: number;
+    must_keep_balance_at_least: number;
+  };
+  snapshot: {
+    starting_balance: number;
+    monthly_income_est: number;
+    monthly_essential_spend_est: number;
+    risk_flags: string[];
+  };
+  actions: QUBOActionInput[];
+  required_action_ids: string[];
+}
+
+export interface QUBOActionContribution {
+  id: string;
+  value: number;
+  cash_component: number;
+  risk_component: number;
+  penalties: number;
 }
 
 export interface QUBOResult {
   selected_action_ids: string[];
-  objective_value: number;
-  solver_used: "exact_enumeration" | "simulated_annealing" | "greedy_fallback";
-  iterations?: number;
+  metrics: {
+    estimated_monthly_cash_impact: number;
+    estimated_risk_reduction: number;
+    effort_minutes_used: number;
+    upfront_cash_used: number;
+    buffer_respected: boolean;
+  };
+  score: {
+    optimization_score: number;
+    goal_weights: {
+      cash: number;
+      risk: number;
+      effort_penalty: number;
+      buffer_penalty: number;
+    };
+  };
+  explain: {
+    top_reasons: string[];
+    action_contributions: QUBOActionContribution[];
+    constraint_notes: string[];
+  };
+  solver: {
+    solver_type: "qubo_sim" | "greedy_fallback";
+    n_actions_considered: number;
+    time_ms: number;
+  };
 }
 
 // ---- Weekly Plan (LLM Output) ----

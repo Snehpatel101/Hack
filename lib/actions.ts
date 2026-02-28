@@ -1,9 +1,21 @@
 // ============================================================
 // Equity Finance Copilot — Action Library (15 actions)
 // ============================================================
-import { Action, FinancialSnapshot } from "./types";
+import { FinancialSnapshot } from "./types";
 
-export const ACTION_LIBRARY: Omit<Action, "eligibility">[] = [
+export const ACTION_LIBRARY: {
+  id: string;
+  name: string;
+  description: string;
+  estimated_monthly_impact: [number, number];
+  risk_reduction: number;
+  effort_minutes: number;
+  upfront_cash_cost: number;
+  cash_buffer_effect: number;
+  goal_weights: { stability: number; debt: number; emergency: number };
+  conflicts_with: string[];
+  synergy_with: string[];
+}[] = [
   {
     id: "cancel_unused_sub",
     name: "Cancel unused subscriptions",
@@ -11,8 +23,11 @@ export const ACTION_LIBRARY: Omit<Action, "eligibility">[] = [
     estimated_monthly_impact: [10, 60],
     risk_reduction: 2,
     effort_minutes: 15,
+    upfront_cash_cost: 0,
     cash_buffer_effect: 30,
     goal_weights: { stability: 0.5, debt: 0.3, emergency: 0.2 },
+    conflicts_with: [],
+    synergy_with: ["reduce_discretionary"],
   },
   {
     id: "negotiate_bill",
@@ -21,8 +36,11 @@ export const ACTION_LIBRARY: Omit<Action, "eligibility">[] = [
     estimated_monthly_impact: [10, 50],
     risk_reduction: 1,
     effort_minutes: 30,
+    upfront_cash_cost: 0,
     cash_buffer_effect: 20,
     goal_weights: { stability: 0.4, debt: 0.3, emergency: 0.3 },
+    conflicts_with: ["switch_phone_plan"],
+    synergy_with: [],
   },
   {
     id: "switch_phone_plan",
@@ -31,8 +49,11 @@ export const ACTION_LIBRARY: Omit<Action, "eligibility">[] = [
     estimated_monthly_impact: [25, 55],
     risk_reduction: 1,
     effort_minutes: 45,
+    upfront_cash_cost: 20,
     cash_buffer_effect: 40,
     goal_weights: { stability: 0.4, debt: 0.3, emergency: 0.3 },
+    conflicts_with: ["negotiate_bill"],
+    synergy_with: [],
   },
   {
     id: "set_overdraft_alert",
@@ -41,8 +62,11 @@ export const ACTION_LIBRARY: Omit<Action, "eligibility">[] = [
     estimated_monthly_impact: [0, 35],
     risk_reduction: 8,
     effort_minutes: 5,
+    upfront_cash_cost: 0,
     cash_buffer_effect: 0,
     goal_weights: { stability: 0.9, debt: 0.05, emergency: 0.05 },
+    conflicts_with: [],
+    synergy_with: ["request_due_date_change"],
   },
   {
     id: "automate_min_payments",
@@ -51,8 +75,11 @@ export const ACTION_LIBRARY: Omit<Action, "eligibility">[] = [
     estimated_monthly_impact: [0, 70],
     risk_reduction: 9,
     effort_minutes: 15,
+    upfront_cash_cost: 0,
     cash_buffer_effect: 0,
     goal_weights: { stability: 0.8, debt: 0.15, emergency: 0.05 },
+    conflicts_with: [],
+    synergy_with: ["set_bill_reminders"],
   },
   {
     id: "avalanche_extra_payment",
@@ -61,8 +88,11 @@ export const ACTION_LIBRARY: Omit<Action, "eligibility">[] = [
     estimated_monthly_impact: [20, 80],
     risk_reduction: 3,
     effort_minutes: 10,
+    upfront_cash_cost: 100,
     cash_buffer_effect: -50,
     goal_weights: { stability: 0.1, debt: 0.8, emergency: 0.1 },
+    conflicts_with: ["snowball_extra_payment"],
+    synergy_with: ["automate_min_payments"],
   },
   {
     id: "snowball_extra_payment",
@@ -71,8 +101,11 @@ export const ACTION_LIBRARY: Omit<Action, "eligibility">[] = [
     estimated_monthly_impact: [15, 60],
     risk_reduction: 2,
     effort_minutes: 10,
+    upfront_cash_cost: 75,
     cash_buffer_effect: -50,
     goal_weights: { stability: 0.1, debt: 0.7, emergency: 0.2 },
+    conflicts_with: ["avalanche_extra_payment"],
+    synergy_with: ["automate_min_payments"],
   },
   {
     id: "build_micro_emergency",
@@ -81,8 +114,11 @@ export const ACTION_LIBRARY: Omit<Action, "eligibility">[] = [
     estimated_monthly_impact: [0, 0],
     risk_reduction: 7,
     effort_minutes: 10,
+    upfront_cash_cost: 40,
     cash_buffer_effect: -15,
     goal_weights: { stability: 0.3, debt: 0.0, emergency: 0.7 },
+    conflicts_with: [],
+    synergy_with: ["reduce_discretionary"],
   },
   {
     id: "request_due_date_change",
@@ -91,8 +127,11 @@ export const ACTION_LIBRARY: Omit<Action, "eligibility">[] = [
     estimated_monthly_impact: [0, 35],
     risk_reduction: 7,
     effort_minutes: 20,
+    upfront_cash_cost: 0,
     cash_buffer_effect: 0,
     goal_weights: { stability: 0.9, debt: 0.05, emergency: 0.05 },
+    conflicts_with: [],
+    synergy_with: ["set_overdraft_alert"],
   },
   {
     id: "hardship_program",
@@ -101,8 +140,11 @@ export const ACTION_LIBRARY: Omit<Action, "eligibility">[] = [
     estimated_monthly_impact: [30, 150],
     risk_reduction: 5,
     effort_minutes: 30,
+    upfront_cash_cost: 0,
     cash_buffer_effect: 50,
     goal_weights: { stability: 0.5, debt: 0.4, emergency: 0.1 },
+    conflicts_with: [],
+    synergy_with: [],
   },
   {
     id: "reduce_discretionary",
@@ -111,8 +153,11 @@ export const ACTION_LIBRARY: Omit<Action, "eligibility">[] = [
     estimated_monthly_impact: [30, 100],
     risk_reduction: 4,
     effort_minutes: 15,
+    upfront_cash_cost: 0,
     cash_buffer_effect: 60,
     goal_weights: { stability: 0.4, debt: 0.3, emergency: 0.3 },
+    conflicts_with: [],
+    synergy_with: ["cancel_unused_sub", "build_micro_emergency"],
   },
   {
     id: "meal_prep",
@@ -121,8 +166,11 @@ export const ACTION_LIBRARY: Omit<Action, "eligibility">[] = [
     estimated_monthly_impact: [40, 120],
     risk_reduction: 2,
     effort_minutes: 120,
+    upfront_cash_cost: 30,
     cash_buffer_effect: 80,
     goal_weights: { stability: 0.3, debt: 0.3, emergency: 0.4 },
+    conflicts_with: [],
+    synergy_with: [],
   },
   {
     id: "sell_unused_items",
@@ -131,8 +179,11 @@ export const ACTION_LIBRARY: Omit<Action, "eligibility">[] = [
     estimated_monthly_impact: [50, 200],
     risk_reduction: 1,
     effort_minutes: 60,
+    upfront_cash_cost: 10,
     cash_buffer_effect: 100,
     goal_weights: { stability: 0.2, debt: 0.3, emergency: 0.5 },
+    conflicts_with: [],
+    synergy_with: [],
   },
   {
     id: "set_bill_reminders",
@@ -141,8 +192,11 @@ export const ACTION_LIBRARY: Omit<Action, "eligibility">[] = [
     estimated_monthly_impact: [0, 50],
     risk_reduction: 6,
     effort_minutes: 10,
+    upfront_cash_cost: 0,
     cash_buffer_effect: 0,
     goal_weights: { stability: 0.8, debt: 0.1, emergency: 0.1 },
+    conflicts_with: [],
+    synergy_with: ["automate_min_payments"],
   },
   {
     id: "review_bank_fees",
@@ -151,8 +205,11 @@ export const ACTION_LIBRARY: Omit<Action, "eligibility">[] = [
     estimated_monthly_impact: [0, 40],
     risk_reduction: 3,
     effort_minutes: 20,
+    upfront_cash_cost: 0,
     cash_buffer_effect: 20,
     goal_weights: { stability: 0.6, debt: 0.2, emergency: 0.2 },
+    conflicts_with: [],
+    synergy_with: [],
   },
 ];
 

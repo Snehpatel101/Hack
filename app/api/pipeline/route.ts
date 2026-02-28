@@ -14,6 +14,7 @@ import {
   FinancialSnapshot,
   SelectedAction,
   QUBOInput,
+  QUBOActionInput,
   QUBOResult,
   WeeklyPlan,
   WeeklyPlanAction,
@@ -33,7 +34,17 @@ import {
 
 // Default constraints
 const DEFAULT_EFFORT_BUDGET_MINUTES = 180;
+const DEFAULT_UPFRONT_CASH = 200;
 const DEFAULT_MIN_CASH_BUFFER = 50;
+
+function mapGoal(goal: string): QUBOInput["goal"] {
+  switch (goal) {
+    case "stability": return "stabilize_cashflow";
+    case "debt": return "pay_down_debt";
+    case "emergency": return "build_emergency_fund";
+    default: return "stabilize_cashflow";
+  }
+}
 
 /**
  * Generate a unique trace ID (simple UUID-like).
@@ -238,14 +249,7 @@ export async function POST(request: NextRequest) {
 
     const selectedActions: SelectedAction[] = eligibleActions.map(
       (action, idx) => ({
-        id: action.id,
-        name: action.name,
-        description: action.description,
-        estimated_monthly_impact: action.estimated_monthly_impact,
-        risk_reduction: action.risk_reduction,
-        effort_minutes: action.effort_minutes,
-        cash_buffer_effect: action.cash_buffer_effect,
-        goal_weights: action.goal_weights,
+        ...action,
         priority: eligibleActions.length - idx,
       })
     );
@@ -253,31 +257,49 @@ export async function POST(request: NextRequest) {
     // Determine required actions
     const requiredIds: string[] = [];
     if (snapshot.debts.length > 0) {
-      const hasAutomate = selectedActions.find(
-        (a) => a.id === "automate_min_payments"
-      );
-      if (hasAutomate) requiredIds.push("automate_min_payments");
+      if (selectedActions.some((a) => a.id === "automate_min_payments")) {
+        requiredIds.push("automate_min_payments");
+      }
     }
-    if (
-      snapshot.risk_windows.some(
-        (w) => w.risk_level === "critical" || w.risk_level === "high"
-      )
-    ) {
-      const hasAlert = selectedActions.find(
-        (a) => a.id === "set_overdraft_alert"
-      );
-      if (hasAlert) requiredIds.push("set_overdraft_alert");
+    if (snapshot.risk_windows.some((w) => w.risk_level === "critical" || w.risk_level === "high")) {
+      if (selectedActions.some((a) => a.id === "set_overdraft_alert")) {
+        requiredIds.push("set_overdraft_alert");
+      }
     }
 
+    // Convert to QUBOActionInput[]
+    const quboActions: QUBOActionInput[] = selectedActions.map((a) => ({
+      id: a.id,
+      label: a.name,
+      effort_minutes: a.effort_minutes,
+      upfront_cash_cost: a.upfront_cash_cost,
+      monthly_cashflow_delta: a.cash_buffer_effect,
+      risk_reduction_score: a.risk_reduction,
+      eligibility: true,
+      conflicts_with: a.conflicts_with,
+      synergy_with: a.synergy_with,
+    }));
+
     const quboInput: QUBOInput = {
-      actions: selectedActions,
-      effort_budget_minutes: DEFAULT_EFFORT_BUDGET_MINUTES,
-      min_cash_buffer: DEFAULT_MIN_CASH_BUFFER,
-      current_balance: snapshot.checking_balance,
+      goal: mapGoal(snapshot.goal),
+      constraints: {
+        max_effort_minutes_week: DEFAULT_EFFORT_BUDGET_MINUTES,
+        max_upfront_cash_week: DEFAULT_UPFRONT_CASH,
+        must_keep_balance_at_least: DEFAULT_MIN_CASH_BUFFER,
+      },
+      snapshot: {
+        starting_balance: snapshot.checking_balance,
+        monthly_income_est: snapshot.monthly_income,
+        monthly_essential_spend_est: snapshot.monthly_spending.essentials,
+        risk_flags: snapshot.risk_windows
+          .filter((w) => w.risk_level === "critical" || w.risk_level === "high")
+          .map((w) => w.description),
+      },
+      actions: quboActions,
       required_action_ids: requiredIds,
     };
 
-    const quboResult: QUBOResult = solveQUBO(quboInput, snapshot.goal);
+    const quboResult: QUBOResult = solveQUBO(quboInput);
 
     const chosenActions = selectedActions.filter((a) =>
       quboResult.selected_action_ids.includes(a.id)
@@ -286,7 +308,7 @@ export async function POST(request: NextRequest) {
     traceSteps.push({
       tool: "qubo-optimizer",
       input_summary: `${selectedActions.length} candidate actions, budget=${DEFAULT_EFFORT_BUDGET_MINUTES}min, required=[${requiredIds.join(", ")}]`,
-      output_summary: `Selected ${quboResult.selected_action_ids.length} actions via ${quboResult.solver_used}, objective=${quboResult.objective_value.toFixed(3)}`,
+      output_summary: `Selected ${quboResult.selected_action_ids.length} actions via ${quboResult.solver.solver_type}, score=${quboResult.score.optimization_score.toFixed(3)}`,
       timestamp: new Date(stepOptimizeStart).toISOString(),
       duration_ms: Date.now() - stepOptimizeStart,
     });
