@@ -7,7 +7,6 @@ import FileUpload from "../components/FileUpload";
 import ProfileForm from "../components/ProfileForm";
 import SnapshotView from "../components/SnapshotView";
 import PlanView from "../components/PlanView";
-import QUBOVisualization from "../components/QUBOVisualization";
 import RiskAlert from "../components/RiskAlert";
 import ChatBot from "../components/ChatBot";
 import ConversationalIntake from "../components/ConversationalIntake";
@@ -619,36 +618,22 @@ export default function Home() {
               </div>
             )}
 
-            {/* 3. Visuals First — Charts & Optimization */}
-            <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 md:gap-8">
-              {/* Left Col: Projection + Spending (3/5) */}
-              <div className="lg:col-span-3 space-y-6">
-                {/* 90-Day Balance Projection */}
-                <div className="animate-slide-up" style={{ animationDelay: "150ms", animationFillMode: "both" }}>
-                  <EquityCurve snapshot={result.snapshot} />
-                </div>
-
-                {/* Spending by Category */}
-                {result.normalizer && result.normalizer.totalSpend > 0 && (
-                  <div className="animate-slide-up" style={{ animationDelay: "200ms", animationFillMode: "both" }}>
-                    <CategoryPieChart
-                      categoryTotals={result.normalizer.categoryTotals}
-                      totalSpend={result.normalizer.totalSpend}
-                    />
-                  </div>
-                )}
+            {/* 3. Visuals — Charts */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
+              {/* 90-Day Balance Projection */}
+              <div className="animate-slide-up" style={{ animationDelay: "150ms", animationFillMode: "both" }}>
+                <EquityCurve snapshot={result.snapshot} />
               </div>
 
-              {/* Right Col: QUBO Optimization (2/5) */}
-              <div className="lg:col-span-2 lg:self-start">
-                <div className="animate-slide-up" style={{ animationDelay: "250ms", animationFillMode: "both" }}>
-                  <QUBOVisualization
-                    quboResult={result.qubo_result}
-                    allActions={[]}
-                    lang={lang}
+              {/* Spending by Category */}
+              {result.normalizer && result.normalizer.totalSpend > 0 && (
+                <div className="animate-slide-up" style={{ animationDelay: "200ms", animationFillMode: "both" }}>
+                  <CategoryPieChart
+                    categoryTotals={result.normalizer.categoryTotals}
+                    totalSpend={result.normalizer.totalSpend}
                   />
                 </div>
-              </div>
+              )}
             </div>
 
             {/* 4. Action Plan */}
