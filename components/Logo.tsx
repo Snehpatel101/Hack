@@ -7,26 +7,26 @@ interface LogoProps {
 
 export default function Logo({ size = "md", showTagline = true }: LogoProps) {
   const sizes = {
-    sm: { main: "text-lg", or: "text-sm", sub: "text-[8px]", gap: "mx-1.5" },
-    md: { main: "text-2xl", or: "text-lg", sub: "text-[10px]", gap: "mx-2" },
-    lg: { main: "text-4xl", or: "text-2xl", sub: "text-xs", gap: "mx-2.5" },
+    sm: { main: "text-base md:text-lg", or: "text-[10px] md:text-xs", sub: "text-[8px] md:text-[9px]", gap: "mx-1 md:mx-1.5" },
+    md: { main: "text-xl md:text-2xl", or: "text-xs md:text-sm", sub: "text-[9px] md:text-[11px]", gap: "mx-1.5 md:mx-2" },
+    lg: { main: "text-3xl md:text-4xl", or: "text-lg md:text-xl", sub: "text-[11px] md:text-[13px]", gap: "mx-2 md:mx-2.5" },
   };
   const s = sizes[size];
 
   return (
-    <div className="flex flex-col items-start select-none">
-      <div className={`${s.main} font-extrabold tracking-tight leading-tight`}>
-        <span className="text-teal-400">ONE DAY</span>
+    <div className="flex flex-col items-start select-none group">
+      <div className={`${s.main} font-black tracking-tighter leading-none flex items-baseline`}>
+        <span className="bg-gradient-to-br from-cyan-100 to-cyan-400 bg-clip-text text-transparent">ONE DAY</span>
         <span
-          className={`${s.or} ${s.gap} text-slate-400 font-light italic animate-pulse-subtle`}
+          className={`${s.or} ${s.gap} text-slate-600 font-medium italic animate-pulse-subtle`}
         >
           or
         </span>
-        <span className="text-cyan-400">DAY ONE</span>
+        <span className="bg-gradient-to-br from-emerald-200 to-sky-400 bg-clip-text text-transparent">DAY ONE</span>
       </div>
       {showTagline && (
         <p
-          className={`${s.sub} uppercase tracking-[0.25em] text-slate-500 mt-1 font-medium`}
+          className={`${s.sub} uppercase tracking-[0.4em] text-slate-500 mt-2 font-semibold transition-colors group-hover:text-cyan-300`}
         >
           Equity Finance Copilot
         </p>
