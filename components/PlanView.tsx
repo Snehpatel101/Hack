@@ -1,10 +1,12 @@
 "use client";
 
 import type { WeeklyPlan, WeeklyPlanAction } from "../lib/types";
+import { t } from "../lib/translations";
 import RiskAlert from "./RiskAlert";
 
 interface PlanViewProps {
   plan: WeeklyPlan;
+  lang?: string;
 }
 
 function formatCurrency(amount: number): string {
@@ -16,25 +18,16 @@ function formatCurrency(amount: number): string {
   }).format(amount);
 }
 
-const PRIORITY_BADGE: Record<
-  WeeklyPlanAction["priority"],
-  { className: string; label: string }
-> = {
-  must_do: {
-    className: "bg-red-500/20 text-red-400",
-    label: "Must Do",
-  },
-  should_do: {
-    className: "bg-cyan-500/20 text-cyan-400",
-    label: "Should Do",
-  },
-  nice_to_have: {
-    className: "bg-slate-600/50 text-slate-400",
-    label: "Nice to Have",
-  },
-};
+function getPriorityBadge(priority: WeeklyPlanAction["priority"], lang: string) {
+  const badges: Record<WeeklyPlanAction["priority"], { className: string; label: string }> = {
+    must_do: { className: "bg-red-500/20 text-red-400", label: t(lang, "mustDo") },
+    should_do: { className: "bg-cyan-500/20 text-cyan-400", label: t(lang, "shouldDo") },
+    nice_to_have: { className: "bg-slate-600/50 text-slate-400", label: t(lang, "niceToHave") },
+  };
+  return badges[priority];
+}
 
-export default function PlanView({ plan }: PlanViewProps) {
+export default function PlanView({ plan, lang = "en" }: PlanViewProps) {
   const [savingsLow, savingsHigh] = plan.total_estimated_monthly_savings;
 
   // Collect top 3 from week_1 and everything else into remaining
@@ -50,25 +43,25 @@ export default function PlanView({ plan }: PlanViewProps) {
       {/* ── Summary ── */}
       <section className="glass-card p-6 card-glow shadow-black/40 transition-all duration-300">
         <h2 className="text-lg font-bold text-slate-100">
-          Your Financial Plan
+          {t(lang, "yourFinancialPlan")}
         </h2>
         <p className="mt-2 text-sm leading-relaxed text-slate-400">
           {plan.summary}
         </p>
         <p className="mt-3 text-sm font-medium text-cyan-400">
-          Estimated savings: {formatCurrency(savingsLow)}&ndash;
+          {t(lang, "estimatedSavings")} {formatCurrency(savingsLow)}&ndash;
           {formatCurrency(savingsHigh)}/month
         </p>
       </section>
 
       {/* ── Risk Alerts ── */}
-      {plan.risk_alerts.length > 0 && <RiskAlert alerts={plan.risk_alerts} />}
+      {plan.risk_alerts.length > 0 && <RiskAlert alerts={plan.risk_alerts} lang={lang} />}
 
       {/* ── Top 3 Priority Actions ── */}
       {top3.length > 0 && (
         <section>
           <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-cyan-400/80">
-            Top 3 Priority Actions
+            {t(lang, "top3PriorityActions")}
           </h3>
           <div className="space-y-4">
             {top3.map((action, index) => (
@@ -76,6 +69,7 @@ export default function PlanView({ plan }: PlanViewProps) {
                 key={action.action_id || index}
                 action={action}
                 step={index + 1}
+                lang={lang}
               />
             ))}
           </div>
@@ -86,7 +80,7 @@ export default function PlanView({ plan }: PlanViewProps) {
       {remaining.length > 0 && (
         <section>
           <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
-            More Actions
+            {t(lang, "moreActions")}
           </h3>
           <ul className="space-y-1">
             {remaining.map((action, index) => (
@@ -130,11 +124,13 @@ export default function PlanView({ plan }: PlanViewProps) {
 function TopActionCard({
   action,
   step,
+  lang,
 }: {
   action: WeeklyPlanAction;
   step: number;
+  lang: string;
 }) {
-  const badge = PRIORITY_BADGE[action.priority];
+  const badge = getPriorityBadge(action.priority, lang);
 
   const howSteps = action.how
     .split(/\n|(?=\d+\.\s)/)
@@ -142,7 +138,7 @@ function TopActionCard({
     .filter((s) => s.length > 0);
 
   return (
-    <article className="glass-card p-5 card-glow shadow-black/40 transition-all duration-300 animate-slide-up">
+    <article className="glass-card p-3 sm:p-5 card-glow shadow-black/40 transition-all duration-300 animate-slide-up">
       {/* Header row */}
       <div className="flex items-start gap-3">
         {/* Step number */}
@@ -169,9 +165,9 @@ function TopActionCard({
 
       {/* How steps */}
       {howSteps.length > 0 && (
-        <div className="mt-4 pl-10">
+        <div className="mt-4 pl-4 sm:pl-10">
           <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-            How
+            {t(lang, "how")}
           </p>
           <ol className="mt-1.5 space-y-1">
             {howSteps.map((s, i) => (
@@ -191,8 +187,8 @@ function TopActionCard({
 
       {/* Estimated savings */}
       {action.estimated_savings && (
-        <p className="mt-3 pl-10 text-xs font-medium text-cyan-400/80">
-          Estimated savings: {action.estimated_savings}
+        <p className="mt-3 pl-4 sm:pl-10 text-xs font-medium text-cyan-400/80">
+          {t(lang, "estimatedSavings")} {action.estimated_savings}
         </p>
       )}
     </article>

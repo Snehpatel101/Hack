@@ -2,12 +2,12 @@
 import { useState, useRef, useEffect } from "react";
 
 const LANGUAGES = [
-  { code: "en", label: "English", flag: "EN" },
-  { code: "es", label: "Espanol", flag: "ES" },
-  { code: "fr", label: "Francais", flag: "FR" },
-  { code: "zh", label: "Chinese", flag: "ZH" },
-  { code: "hi", label: "Hindi", flag: "HI" },
-  { code: "ar", label: "Arabic", flag: "AR" },
+  { code: "en", label: "English", flag: "\u{1F1FA}\u{1F1F8}" },
+  { code: "es", label: "Espa\u00F1ol", flag: "\u{1F1EA}\u{1F1F8}" },
+  { code: "fr", label: "Fran\u00E7ais", flag: "\u{1F1EB}\u{1F1F7}" },
+  { code: "zh", label: "\u4E2D\u6587", flag: "\u{1F1E8}\u{1F1F3}" },
+  { code: "hi", label: "\u0939\u093F\u0928\u094D\u0926\u0940", flag: "\u{1F1EE}\u{1F1F3}" },
+  { code: "ar", label: "\u0627\u0644\u0639\u0631\u0628\u064A\u0629", flag: "\u{1F1F8}\u{1F1E6}" },
 ];
 
 interface LanguageSelectorProps {
@@ -100,7 +100,7 @@ export default function LanguageSelector({
             >
               <span>{lang.label}</span>
               <span
-                className={`text-xs font-mono ${
+                className={`text-base ${
                   lang.code === currentLang
                     ? "text-teal-500"
                     : "text-slate-500"

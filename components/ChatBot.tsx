@@ -2,12 +2,14 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import type { FinancialSnapshot, WeeklyPlan } from "../lib/types";
+import { t } from "../lib/translations";
 
 interface ChatBotProps {
   context?: {
     snapshot: FinancialSnapshot | null;
     plan: WeeklyPlan | null;
   };
+  lang?: string;
 }
 
 interface Message {
@@ -16,18 +18,18 @@ interface Message {
   content: string;
 }
 
-const SUGGESTION_CHIPS = [
-  "Explain my overdraft risk",
-  "How do I cancel subscriptions?",
-  "What is avalanche vs snowball?",
-  "Help me save more",
+const getSuggestionChips = (lang: string) => [
+  t(lang, "explainOverdraft"),
+  t(lang, "cancelSubs"),
+  t(lang, "avalancheVsSnowball"),
+  t(lang, "helpSave"),
 ];
 
 function generateId(): string {
   return `msg-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-export default function ChatBot({ context }: ChatBotProps) {
+export default function ChatBot({ context, lang = "en" }: ChatBotProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -99,7 +101,7 @@ export default function ChatBot({ context }: ChatBotProps) {
           id: generateId(),
           role: "assistant",
           content:
-            replyText || "Sorry, I could not process that. Please try again.",
+            replyText || t(lang, "errorProcess"),
         };
 
         setMessages((prev) => [...prev, botMessage]);
@@ -108,15 +110,14 @@ export default function ChatBot({ context }: ChatBotProps) {
         const errorMessage: Message = {
           id: generateId(),
           role: "assistant",
-          content:
-            "Sorry, something went wrong. Please check your connection and try again.",
+          content: t(lang, "errorNetwork"),
         };
         setMessages((prev) => [...prev, errorMessage]);
       } finally {
         setIsLoading(false);
       }
     },
-    [isLoading, messages, context]
+    [isLoading, messages, context, lang]
   );
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -207,7 +208,7 @@ export default function ChatBot({ context }: ChatBotProps) {
 
       {/* Chat window */}
       <div
-        className={`fixed bottom-24 right-6 z-50 w-[400px] max-w-[calc(100vw-2rem)] transition-all duration-300 ease-in-out ${
+        className={`fixed bottom-24 right-6 z-50 w-[calc(100vw-2rem)] sm:w-[400px] transition-all duration-300 ease-in-out ${
           isOpen
             ? "opacity-100 translate-y-0 pointer-events-auto"
             : "opacity-0 translate-y-4 pointer-events-none"
@@ -229,11 +230,11 @@ export default function ChatBot({ context }: ChatBotProps) {
               </div>
               <div>
                 <h3 className="text-slate-100 font-semibold text-sm leading-tight">
-                  Ask Copilot
+                  {t(lang, "askCopilot")}
                 </h3>
                 <span className="inline-flex items-center gap-1 text-[10px] text-slate-500 font-medium">
                   <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" />
-                  powered by watsonx.ai
+                  {t(lang, "poweredByWatsonx")}
                 </span>
               </div>
             </div>
@@ -275,15 +276,13 @@ export default function ChatBot({ context }: ChatBotProps) {
                     AI
                   </div>
                   <div className="bg-[#334155] text-slate-300 rounded-2xl rounded-tl-md px-3.5 py-2.5 text-sm leading-relaxed max-w-[85%]">
-                    Hi! I am your financial copilot. I can help you understand
-                    your plan, explain risks, and answer questions about your
-                    finances. What would you like to know?
+                    {t(lang, "welcomeMessage")}
                   </div>
                 </div>
 
                 {/* Suggestion chips */}
                 <div className="flex flex-wrap gap-2 pl-8">
-                  {SUGGESTION_CHIPS.map((chip) => (
+                  {getSuggestionChips(lang).map((chip) => (
                     <button
                       key={chip}
                       onClick={() => handleChipClick(chip)}
@@ -367,7 +366,7 @@ export default function ChatBot({ context }: ChatBotProps) {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Ask about your finances..."
+                placeholder={t(lang, "askAboutFinances")}
                 disabled={isLoading}
                 className="flex-1 bg-transparent text-slate-100 placeholder-slate-600 text-sm py-2 focus:outline-none disabled:opacity-50"
               />

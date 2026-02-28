@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { QUBOResult, SelectedAction } from "../lib/types";
+import { t } from "../lib/translations";
 
 // ---------------------------------------------------------------------------
 // Props
@@ -9,6 +10,7 @@ import type { QUBOResult, SelectedAction } from "../lib/types";
 interface QUBOVisualizationProps {
   quboResult: QUBOResult;
   allActions: SelectedAction[];
+  lang?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -83,7 +85,7 @@ function ActionChip({ action }: { action: SelectedAction }) {
 }
 
 /** Expandable "How does this work?" section. */
-function HowItWorks() {
+function HowItWorks({ lang = "en" }: { lang?: string }) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -96,7 +98,7 @@ function HowItWorks() {
       >
         <span className="flex items-center gap-1.5">
           <InfoIcon />
-          How does this work?
+          {t(lang, "howDoesThisWork")}
         </span>
         <ChevronIcon open={open} />
       </button>
@@ -169,6 +171,7 @@ function ChevronIcon({ open }: { open: boolean }) {
 export default function QUBOVisualization({
   quboResult,
   allActions,
+  lang = "en",
 }: QUBOVisualizationProps) {
   const selectedIds = new Set(quboResult.selected_action_ids);
   const selectedActions = allActions.filter((a) => selectedIds.has(a.id));
@@ -190,38 +193,37 @@ export default function QUBOVisualization({
       <div className="flex items-start justify-between">
         <div>
           <h3 className="text-sm font-semibold text-slate-100">
-            Optimization Engine
+            {t(lang, "optimizationEngine")}
           </h3>
           <p className="mt-1 text-xs text-slate-500 max-w-md">
-            Quantum-inspired (QUBO) optimizer selects the best combination of
-            actions within your constraints.
+            {t(lang, "quboDesc")}
           </p>
         </div>
         <span className="bg-violet-500/15 text-violet-400 text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap">
-          quantum-inspired
+          {t(lang, "quantumInspired")}
         </span>
       </div>
 
       {/* ---- Key Metrics Row ---- */}
-      <div className="mt-5 grid grid-cols-3 gap-3">
+      <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-3">
         {/* Actions Selected */}
-        <MetricCard label="Actions Selected">
+        <MetricCard label={t(lang, "actionsSelected")}>
           <span className={hasSelections ? "text-cyan-400" : "text-red-400"}>
             {selectedCount}
           </span>
           <span className="text-slate-500 text-sm font-normal">
             {" "}
-            of {totalActions}
+            {t(lang, "of")} {totalActions}
           </span>
         </MetricCard>
 
         {/* Solver */}
-        <MetricCard label="Solver" sublabel={iterationsLabel ?? undefined}>
+        <MetricCard label={t(lang, "solver")} sublabel={iterationsLabel ?? undefined}>
           <span className="text-slate-200 text-sm">{solverName}</span>
         </MetricCard>
 
         {/* Optimization Score */}
-        <MetricCard label="Optimization Score" sublabel="lower = better fit">
+        <MetricCard label={t(lang, "optimizationScore")} sublabel={t(lang, "lowerBetter")}>
           <span className="text-cyan-400">
             {Math.abs(quboResult.objective_value).toFixed(1)}
           </span>
@@ -242,7 +244,7 @@ export default function QUBOVisualization({
         {hasSelections ? (
           <>
             <p className="text-xs font-medium uppercase tracking-wide text-cyan-400 mb-2">
-              Selected Actions
+              {t(lang, "selectedActions")}
             </p>
             <div className="flex flex-wrap gap-2">
               {selectedActions.length > 0
@@ -263,16 +265,14 @@ export default function QUBOVisualization({
           <div className="flex items-start gap-2.5 rounded-lg border border-white/[0.06] bg-white/[0.03] backdrop-blur-sm px-4 py-3">
             <InfoIcon />
             <p className="text-xs leading-relaxed text-slate-400">
-              No actions could be optimized within the current constraints. The
-              system has applied a fallback plan to ensure you still receive
-              guidance.
+              {t(lang, "noActionsOptimized")}
             </p>
           </div>
         )}
       </div>
 
       {/* ---- How It Works (expandable) ---- */}
-      <HowItWorks />
+      <HowItWorks lang={lang} />
     </div>
   );
 }

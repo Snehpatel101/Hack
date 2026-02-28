@@ -7,6 +7,7 @@ import type {
   Subscription,
   DebtInfo,
 } from "../lib/types";
+import { t } from "../lib/translations";
 
 /* ------------------------------------------------------------------ */
 /*  Formatters                                                         */
@@ -124,7 +125,7 @@ const RISK_BADGE: Record<RiskWindow["risk_level"], string> = {
 /*  Main Component                                                     */
 /* ------------------------------------------------------------------ */
 
-export default function SnapshotView({ snapshot }: { snapshot: FinancialSnapshot }) {
+export default function SnapshotView({ snapshot, lang = "en" }: { snapshot: FinancialSnapshot; lang?: string }) {
   const spending = snapshot.monthly_spending;
   const totalSpending =
     spending.essentials +
@@ -140,10 +141,10 @@ export default function SnapshotView({ snapshot }: { snapshot: FinancialSnapshot
   );
 
   const spendingCategories = [
-    { label: "Essentials", value: spending.essentials, color: "bg-cyan-500" },
-    { label: "Discretionary", value: spending.discretionary, color: "bg-cyan-400" },
-    { label: "Debt Payments", value: spending.debt_payments, color: "bg-red-500" },
-    { label: "Subscriptions", value: spending.subscriptions, color: "bg-sky-400" },
+    { label: t(lang, "essentials"), value: spending.essentials, color: "bg-cyan-500" },
+    { label: t(lang, "discretionary"), value: spending.discretionary, color: "bg-cyan-400" },
+    { label: t(lang, "debtPayments"), value: spending.debt_payments, color: "bg-red-500" },
+    { label: t(lang, "subscriptions"), value: spending.subscriptions, color: "bg-sky-400" },
   ];
 
   const highestApr =
@@ -157,28 +158,28 @@ export default function SnapshotView({ snapshot }: { snapshot: FinancialSnapshot
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
         <StatCard
           icon={<WalletIcon className="h-4 w-4" />}
-          label="Checking Balance"
+          label={t(lang, "checkingBalanceLabel")}
           value={formatCurrency(snapshot.checking_balance)}
           accent={snapshot.checking_balance < 200 ? "text-red-400" : "text-cyan-400"}
           border="border-l-cyan-500"
         />
         <StatCard
           icon={<ArrowUpIcon className="h-4 w-4" />}
-          label="Monthly Income"
+          label={t(lang, "monthlyIncomeLabel")}
           value={formatCurrency(snapshot.monthly_income)}
           accent="text-emerald-400"
           border="border-l-emerald-500"
         />
         <StatCard
           icon={<ArrowDownIcon className="h-4 w-4" />}
-          label="Monthly Spending"
+          label={t(lang, "monthlySpending")}
           value={formatCurrency(totalSpending)}
           accent="text-slate-100"
           border="border-l-slate-400"
         />
         <StatCard
           icon={<SparklesIcon className="h-4 w-4" />}
-          label="Free Cash"
+          label={t(lang, "freeCash")}
           value={formatCurrency(snapshot.free_cash_monthly)}
           accent={snapshot.free_cash_monthly < 50 ? "text-red-400" : "text-emerald-400"}
           border={snapshot.free_cash_monthly < 50 ? "border-l-red-500" : "border-l-emerald-500"}
@@ -186,11 +187,10 @@ export default function SnapshotView({ snapshot }: { snapshot: FinancialSnapshot
       </div>
 
       {/* ---- Monthly Spending Breakdown ---- */}
-      <Section title="Monthly Spending Breakdown">
+      <Section title={t(lang, "monthlySpendingBreakdown")}>
         {totalSpending === 0 ? (
           <p className="mt-4 text-xs text-slate-500">
-            No spending data detected. Upload transactions that include expense
-            amounts (negative values) to see your breakdown.
+            {t(lang, "noSpendingData")}
           </p>
         ) : (
           <div className="mt-4 space-y-3">
@@ -232,15 +232,15 @@ export default function SnapshotView({ snapshot }: { snapshot: FinancialSnapshot
           </div>
         )}
         <p className="mt-3 text-xs text-slate-500">
-          Total: {formatCurrency(totalSpending)} / month
+          {t(lang, "total")} {formatCurrency(totalSpending)} {t(lang, "perMonth")}
         </p>
       </Section>
 
       {/* ---- Risk Windows ---- */}
       {snapshot.risk_windows.length > 0 && (
         <Section
-          title="Risk Windows"
-          subtitle="Upcoming dates when your balance may be dangerously low."
+          title={t(lang, "riskWindows")}
+          subtitle={t(lang, "riskWindowsSubtitle")}
         >
           <div className="mt-4 space-y-2">
             {snapshot.risk_windows.map((rw, i) => (
@@ -253,12 +253,12 @@ export default function SnapshotView({ snapshot }: { snapshot: FinancialSnapshot
       {/* ---- Subscription Leaks ---- */}
       {snapshot.subscription_leaks.length > 0 && (
         <Section
-          title="Subscription Leaks"
-          subtitle="Subscriptions that may be wasting your money."
+          title={t(lang, "subscriptionLeaks")}
+          subtitle={t(lang, "subscriptionLeaksSubtitle")}
         >
           <div className="mt-3 divide-y divide-slate-700/50">
             {snapshot.subscription_leaks.map((sub, i) => (
-              <SubscriptionLeakRow key={i} subscription={sub} />
+              <SubscriptionLeakRow key={i} subscription={sub} lang={lang} />
             ))}
           </div>
         </Section>
@@ -266,17 +266,17 @@ export default function SnapshotView({ snapshot }: { snapshot: FinancialSnapshot
 
       {/* ---- Debts ---- */}
       {snapshot.debts.length > 0 && (
-        <Section title="Debts">
+        <Section title={t(lang, "debts")}>
           <div className="mt-4 overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
                 <tr className="border-b border-slate-700/60">
-                  <th className="pb-2 pr-4 font-medium text-slate-500">Name</th>
-                  <th className="pb-2 pr-4 font-medium text-slate-500">Balance</th>
-                  <th className="pb-2 pr-4 font-medium text-slate-500">APR</th>
-                  <th className="pb-2 pr-4 font-medium text-slate-500">Min Payment</th>
-                  <th className="pb-2 pr-4 font-medium text-slate-500">Monthly Interest</th>
-                  <th className="pb-2 font-medium text-slate-500">Payoff (mo)</th>
+                  <th className="pb-2 pr-4 font-medium text-slate-500">{t(lang, "name")}</th>
+                  <th className="pb-2 pr-4 font-medium text-slate-500">{t(lang, "balance")}</th>
+                  <th className="pb-2 pr-4 font-medium text-slate-500">{t(lang, "apr")}</th>
+                  <th className="pb-2 pr-4 font-medium text-slate-500">{t(lang, "minPayment")}</th>
+                  <th className="pb-2 pr-4 font-medium text-slate-500">{t(lang, "monthlyInterest")}</th>
+                  <th className="pb-2 font-medium text-slate-500">{t(lang, "payoffMonths")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-700/40">
@@ -292,8 +292,7 @@ export default function SnapshotView({ snapshot }: { snapshot: FinancialSnapshot
           </div>
           {snapshot.debts.length > 1 && (
             <p className="mt-3 text-xs text-slate-500 italic">
-              Focus on the highest APR debt first (avalanche method) to save the
-              most on interest.
+              {t(lang, "focusHighestApr")}
             </p>
           )}
         </Section>
@@ -301,7 +300,7 @@ export default function SnapshotView({ snapshot }: { snapshot: FinancialSnapshot
 
       {/* ---- Meta ---- */}
       <p className="text-center text-xs text-slate-600">
-        Snapshot as of {snapshot.as_of} | Goal: {snapshot.goal}
+        {t(lang, "snapshotAsOf")} {snapshot.as_of} | {t(lang, "goal")} {snapshot.goal}
       </p>
     </div>
   );
@@ -409,7 +408,7 @@ function RiskWindowRow({ riskWindow }: { riskWindow: RiskWindow }) {
 /*  Subscription Leak Row                                              */
 /* ------------------------------------------------------------------ */
 
-function SubscriptionLeakRow({ subscription }: { subscription: Subscription }) {
+function SubscriptionLeakRow({ subscription, lang = "en" }: { subscription: Subscription; lang?: string }) {
   return (
     <div className="flex items-center justify-between py-2.5 text-sm">
       <div className="flex items-center gap-2 min-w-0">
@@ -425,7 +424,7 @@ function SubscriptionLeakRow({ subscription }: { subscription: Subscription }) {
           {formatCurrencyPrecise(subscription.amount)}/mo
         </span>
         <span className="text-xs text-amber-400/80 cursor-pointer hover:text-amber-300 transition-colors">
-          Cancel?
+          {t(lang, "cancel")}
         </span>
       </div>
     </div>

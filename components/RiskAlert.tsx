@@ -1,10 +1,13 @@
 "use client";
 
+import { t } from "../lib/translations";
+
 interface RiskAlertProps {
   alerts: string[];
+  lang?: string;
 }
 
-export default function RiskAlert({ alerts }: RiskAlertProps) {
+export default function RiskAlert({ alerts, lang = "en" }: RiskAlertProps) {
   if (alerts.length === 0) return null;
 
   return (
@@ -34,7 +37,7 @@ export default function RiskAlert({ alerts }: RiskAlertProps) {
 
         <div className="flex-1">
           <h3 className="text-sm font-semibold text-red-300">
-            {alerts.length === 1 ? "Risk Alert" : `${alerts.length} Risk Alerts`}
+            {alerts.length === 1 ? t(lang, "riskAlert") : `${alerts.length} ${t(lang, "riskAlerts")}`}
           </h3>
           <ul className="mt-2 space-y-1">
             {alerts.map((alert, index) => (

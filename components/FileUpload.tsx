@@ -1,17 +1,20 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
+import { t } from "../lib/translations";
 
 interface FileUploadProps {
   onFileSelected: (file: File) => void;
   onDemoLoad: () => void;
   isLoading: boolean;
+  lang?: string;
 }
 
 export default function FileUpload({
   onFileSelected,
   onDemoLoad,
   isLoading,
+  lang = "en",
 }: FileUploadProps) {
   const [dragActive, setDragActive] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -118,11 +121,11 @@ export default function FileUpload({
         </div>
 
         <p className="text-base font-bold text-slate-100 tracking-tight group-hover:text-cyan-200 transition-colors">
-          Drag & drop your file here, or{" "}
-          <span className="text-cyan-300 underline decoration-2 underline-offset-4 group-hover:text-cyan-200 transition-colors">browse</span>
+          {t(lang, "dragDrop")}{" "}
+          <span className="text-cyan-300 underline decoration-2 underline-offset-4 group-hover:text-cyan-200 transition-colors">{t(lang, "browse")}</span>
         </p>
         <p className="mt-2 text-xs font-bold uppercase tracking-[0.2em] text-slate-500 group-hover:text-slate-400 transition-colors">
-          CSV or JSON files only
+          {t(lang, "csvJsonOnly")}
         </p>
 
         <input
@@ -166,7 +169,7 @@ export default function FileUpload({
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 shadow-lg shadow-emerald-500/10">
             <div className="w-1.5 h-1.5 rounded-full bg-emerald-300 animate-pulse" />
             <span className="text-[10px] font-black uppercase tracking-widest">
-              Ready
+              {t(lang, "ready")}
             </span>
           </div>
         </div>
@@ -178,7 +181,7 @@ export default function FileUpload({
           <div className="w-full border-t border-slate-700/60" />
         </div>
         <div className="relative flex justify-center">
-          <span className="px-4 py-1 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 rounded-full border border-slate-700/70 bg-slate-900/85">or</span>
+          <span className="px-4 py-1 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 rounded-full border border-slate-700/70 bg-slate-900/85">{t(lang, "orDivider")}</span>
         </div>
       </div>
 
@@ -197,10 +200,10 @@ export default function FileUpload({
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
               </svg>
-              Loading...
+              {t(lang, "loading")}
             </>
           ) : (
-            "Experience with Demo Data"
+            t(lang, "experienceDemo")
           )}
         </span>
       </button>

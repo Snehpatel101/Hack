@@ -1,39 +1,44 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { t } from "../lib/translations";
 
 interface ProfileFormProps {
   onSubmit: (profile: { checking_balance: number; goal: string; monthly_income?: number }) => void;
   defaultBalance?: number;
+  lang?: string;
 }
 
-const GOALS = [
+const getGoals = (lang: string) => [
   {
     value: "stability",
-    label: "Stability",
-    description: "Avoid overdrafts and late fees",
+    label: t(lang, "stability"),
+    description: t(lang, "stabilityDesc"),
   },
   {
     value: "debt",
-    label: "Pay Down Debt",
-    description: "Reduce high-interest debt fastest",
+    label: t(lang, "payDownDebt"),
+    description: t(lang, "payDownDebtDesc"),
   },
   {
     value: "emergency",
-    label: "Emergency Fund",
-    description: "Build a safety net for surprises",
+    label: t(lang, "emergencyFund"),
+    description: t(lang, "emergencyFundDesc"),
   },
   {
     value: "auto",
-    label: "Auto (Recommended)",
-    description: "Let the copilot choose the best strategy",
+    label: t(lang, "autoRecommended"),
+    description: t(lang, "autoRecommendedDesc"),
   },
-] as const;
+];
 
 export default function ProfileForm({
   onSubmit,
   defaultBalance,
+  lang = "en",
 }: ProfileFormProps) {
+  const GOALS = getGoals(lang);
+
   const [balance, setBalance] = useState<string>(
     defaultBalance !== undefined ? String(defaultBalance) : ""
   );
@@ -60,7 +65,7 @@ export default function ProfileForm({
               htmlFor="checking_balance"
               className="text-xs font-semibold text-slate-300 block mb-1.5"
             >
-              Checking Balance
+              {t(lang, "checkingBalance")}
             </label>
             <div className="relative group">
               <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none transition-colors group-focus-within:text-cyan-300 text-slate-500">
@@ -80,7 +85,7 @@ export default function ProfileForm({
               />
             </div>
             <p className="text-[11px] text-slate-500 leading-relaxed pl-1">
-              Current balance in your main account.
+              {t(lang, "currentBalance")}
             </p>
           </div>
         </div>
@@ -88,7 +93,7 @@ export default function ProfileForm({
         <div className="space-y-3">
           <div>
             <label htmlFor="monthly_income" className="text-xs font-semibold text-slate-300 block mb-1.5">
-              Monthly Income
+              {t(lang, "monthlyIncome")}
             </label>
             <div className="relative group">
               <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none transition-colors group-focus-within:text-cyan-300 text-slate-500">
@@ -107,7 +112,7 @@ export default function ProfileForm({
               />
             </div>
             <p className="text-[11px] text-slate-500 leading-relaxed pl-1">
-              Total monthly take-home pay (optional).
+              {t(lang, "totalTakeHome")}
             </p>
           </div>
         </div>
@@ -117,10 +122,10 @@ export default function ProfileForm({
       <fieldset className="space-y-4">
         <div>
           <legend className="text-xs font-semibold text-slate-300 mb-1.5">
-            Primary Financial Goal
+            {t(lang, "primaryGoal")}
           </legend>
           <p className="text-xs text-slate-500">
-            Choose what matters most right now.
+            {t(lang, "chooseMost")}
           </p>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -168,7 +173,7 @@ export default function ProfileForm({
           className="btn-primary w-full group"
         >
           <span className="flex items-center justify-center gap-2">
-            Generate Financial Plan
+            {t(lang, "generatePlan")}
             <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>

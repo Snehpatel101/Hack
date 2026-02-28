@@ -28,7 +28,7 @@ export default function CollapsibleSection({
         className={`
           w-full flex items-center justify-between
           bg-[#1e293b] rounded-xl border border-slate-600/50
-          px-6 py-4 cursor-pointer
+          px-4 py-3 sm:px-6 sm:py-4 cursor-pointer
           hover:bg-[#263548] transition-colors
           text-left
           ${isOpen ? "rounded-b-none border-b-transparent" : ""}

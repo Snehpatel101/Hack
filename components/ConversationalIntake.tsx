@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import { t } from "../lib/translations";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -29,6 +30,7 @@ interface ConversationalIntakeProps {
     };
   }) => void;
   onBack: () => void;
+  lang?: string;
 }
 
 interface BillEntry {
@@ -63,23 +65,29 @@ type StepId =
 /*  Constants                                                          */
 /* ------------------------------------------------------------------ */
 
-const GOALS = [
-  { value: "stability", label: "Stability", description: "Avoid overdrafts and late fees" },
-  { value: "debt", label: "Pay Down Debt", description: "Reduce high-interest debt fastest" },
-  { value: "emergency", label: "Emergency Fund", description: "Build a safety net for surprises" },
-  { value: "auto", label: "Auto (Recommended)", description: "Let the copilot choose the best strategy" },
-] as const;
+function getGoals(lang: string) {
+  return [
+    { value: "stability", label: t(lang, "goalStability"), description: t(lang, "goalStabilityDesc") },
+    { value: "debt", label: t(lang, "goalDebt"), description: t(lang, "goalDebtDesc") },
+    { value: "emergency", label: t(lang, "goalEmergency"), description: t(lang, "goalEmergencyDesc") },
+    { value: "auto", label: t(lang, "goalAuto"), description: t(lang, "goalAutoDesc") },
+  ] as const;
+}
 
-const BOT_QUESTIONS: Record<StepId, string> = {
-  income: "How much do you take home each month after taxes?",
-  housing: "How much is your monthly rent or mortgage?",
-  bills: "What recurring bills do you pay monthly? (utilities, phone, internet, insurance, etc.)",
-  subscriptions: "Do you have any subscriptions? (Netflix, Spotify, gym, etc.)",
-  debts: "Do you have any debts? (credit cards, student loans, car payments)",
-  checking: "What's your current checking account balance?",
-  goal: "What's your primary financial goal?",
-  done: "Great! I have everything I need. Let me analyze your finances...",
+const BOT_QUESTION_KEYS: Record<StepId, string> = {
+  income: "incomeQuestion",
+  housing: "housingQuestion",
+  bills: "billsQuestion",
+  subscriptions: "subscriptionsQuestion",
+  debts: "debtsQuestion",
+  checking: "checkingQuestion",
+  goal: "goalQuestion",
+  done: "doneMessage",
 };
+
+function getBotQuestion(step: StepId, lang: string): string {
+  return t(lang, BOT_QUESTION_KEYS[step]);
+}
 
 function generateId(): string {
   return `msg-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
@@ -206,6 +214,7 @@ function buildCsv(answers: {
 export default function ConversationalIntake({
   onComplete,
   onBack,
+  lang = "en",
 }: ConversationalIntakeProps) {
   /* ---- state ---- */
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -264,11 +273,12 @@ export default function ConversationalIntake({
         {
           id: generateId(),
           role: "bot",
-          content: BOT_QUESTIONS.income,
+          content: getBotQuestion("income", lang),
         },
       ]);
     }, 600);
     return () => clearTimeout(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /* ---- helpers ---- */
@@ -298,9 +308,9 @@ export default function ConversationalIntake({
       setNumberInput("");
       setMultiEntries([{ name: "", amount: "" }]);
       setDebtEntries([{ name: "", balance: "", apr: "", minimum_payment: "" }]);
-      addBotMessage(BOT_QUESTIONS[nextStep]);
+      addBotMessage(getBotQuestion(nextStep, lang));
     },
-    [addBotMessage]
+    [addBotMessage, lang]
   );
 
   /* ---- step handlers ---- */
@@ -389,7 +399,8 @@ export default function ConversationalIntake({
   );
 
   const handleGoalSubmit = useCallback(() => {
-    const label = GOALS.find((g) => g.value === selectedGoal)?.label ?? selectedGoal;
+    const goals = getGoals(lang);
+    const label = goals.find((g) => g.value === selectedGoal)?.label ?? selectedGoal;
     addUserMessage(label);
 
     const finalAnswers = { ...answers, goal: selectedGoal };
@@ -404,7 +415,7 @@ export default function ConversationalIntake({
       setIsTyping(false);
       setMessages((prev) => [
         ...prev,
-        { id: generateId(), role: "bot", content: BOT_QUESTIONS.done },
+        { id: generateId(), role: "bot", content: getBotQuestion("done", lang) },
       ]);
 
       // Build CSV and profile, then call onComplete after a brief pause
@@ -441,7 +452,7 @@ export default function ConversationalIntake({
         onComplete({ csvContent, profile });
       }, 800);
     }, 500);
-  }, [selectedGoal, answers, addUserMessage, onComplete]);
+  }, [selectedGoal, answers, addUserMessage, onComplete, lang]);
 
   /* ---- multi-entry helpers ---- */
 
@@ -513,7 +524,7 @@ export default function ConversationalIntake({
   })();
 
   return (
-    <div className="flex flex-col h-full max-h-[700px] glass-card overflow-hidden">
+    <div className="flex flex-col h-full max-h-[85vh] sm:max-h-[700px] glass-card overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between px-5 py-3 bg-slate-900/30 border-b border-slate-800/30">
         <div className="flex items-center gap-3">
@@ -529,10 +540,10 @@ export default function ConversationalIntake({
           </div>
           <div>
             <h3 className="text-sm font-semibold text-slate-100">
-              Financial Setup Assistant
+              {t(lang, "financialSetupAssistant")}
             </h3>
             <p className="text-[11px] text-slate-500">
-              Step {Math.min(stepIndex + 1, 7)} of 7
+              {t(lang, "step")} {Math.min(stepIndex + 1, 7)} {t(lang, "of7")}
             </p>
           </div>
         </div>
@@ -542,7 +553,7 @@ export default function ConversationalIntake({
           onClick={onBack}
           className="text-xs text-slate-500 underline underline-offset-2 hover:text-slate-400 transition-colors"
         >
-          Back to upload
+          {t(lang, "backToUpload")}
         </button>
       </div>
 
@@ -651,7 +662,7 @@ export default function ConversationalIntake({
                 disabled={!numberValid}
                 className="btn-primary rounded-lg px-5 py-2.5 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-40"
               >
-                Next
+                {t(lang, "next")}
               </button>
             </div>
           )}
@@ -712,7 +723,7 @@ export default function ConversationalIntake({
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                   </svg>
-                  Add another
+                  {t(lang, "addAnother")}
                 </button>
                 <div className="flex-1" />
                 {currentStep !== "bills" && (
@@ -721,7 +732,7 @@ export default function ConversationalIntake({
                     onClick={() => handleMultiSubmit(true)}
                     className="rounded-lg px-4 py-2 text-xs font-medium text-slate-400 hover:text-slate-300 transition-colors"
                   >
-                    Skip
+                    {t(lang, "skip")}
                   </button>
                 )}
                 <button
@@ -729,7 +740,7 @@ export default function ConversationalIntake({
                   onClick={() => handleMultiSubmit(false)}
                   className="btn-primary rounded-lg px-5 py-2 text-sm font-semibold"
                 >
-                  Next
+                  {t(lang, "next")}
                 </button>
               </div>
             </div>
@@ -829,7 +840,7 @@ export default function ConversationalIntake({
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                   </svg>
-                  Add another
+                  {t(lang, "addAnother")}
                 </button>
                 <div className="flex-1" />
                 <button
@@ -837,14 +848,14 @@ export default function ConversationalIntake({
                   onClick={() => handleDebtSubmit(true)}
                   className="rounded-lg px-4 py-2 text-xs font-medium text-slate-400 hover:text-slate-300 transition-colors"
                 >
-                  Skip
+                  {t(lang, "skip")}
                 </button>
                 <button
                   type="button"
                   onClick={() => handleDebtSubmit(false)}
                   className="btn-primary rounded-lg px-5 py-2 text-sm font-semibold"
                 >
-                  Next
+                  {t(lang, "next")}
                 </button>
               </div>
             </div>
@@ -854,7 +865,7 @@ export default function ConversationalIntake({
           {isGoalStep && (
             <div className="space-y-3">
               <div className="space-y-2">
-                {GOALS.map((g) => (
+                {getGoals(lang).map((g) => (
                   <label
                     key={g.value}
                     className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition-all duration-300 ${
@@ -885,7 +896,7 @@ export default function ConversationalIntake({
                 onClick={handleGoalSubmit}
                 className="btn-primary w-full rounded-lg px-5 py-2.5 text-sm font-semibold"
               >
-                Analyze My Finances
+                {t(lang, "analyzeFinances")}
               </button>
             </div>
           )}
