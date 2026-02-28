@@ -619,52 +619,29 @@ export default function Home() {
               </div>
             )}
 
-            {/* 3. Financial Details (Full width, always open) */}
-            <div className="animate-slide-up" style={{ animationDelay: "150ms", animationFillMode: "both" }}>
-              <CollapsibleSection
-                title={t(lang, "financialDetails")}
-                subtitle={t(lang, "snapshotSubtitle")}
-                defaultOpen={true}
-              >
-                <SnapshotView snapshot={result.snapshot} lang={lang} />
-              </CollapsibleSection>
-            </div>
-
-            {/* 4. Main Dashboard Grid */}
+            {/* 3. Visuals First — Charts & Optimization */}
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 md:gap-8">
-              {/* Left Col: Chart & Plan (2/3 width) */}
-              <div className="lg:col-span-3 space-y-6 md:space-y-8">
+              {/* Left Col: Projection + Spending (3/5) */}
+              <div className="lg:col-span-3 space-y-6">
                 {/* 90-Day Balance Projection */}
-                <div className="animate-slide-up" style={{ animationDelay: "200ms", animationFillMode: "both" }}>
+                <div className="animate-slide-up" style={{ animationDelay: "150ms", animationFillMode: "both" }}>
                   <EquityCurve snapshot={result.snapshot} />
                 </div>
 
-                {/* Your Action Plan */}
-                <div className="animate-slide-up" style={{ animationDelay: "300ms", animationFillMode: "both" }}>
-                  <CollapsibleSection
-                    title={t(lang, "yourActionPlan")}
-                    subtitle={t(lang, "personalizedSteps")}
-                    defaultOpen={true}
-                  >
-                    <PlanView plan={result.plan} lang={lang} />
-                  </CollapsibleSection>
-                </div>
-              </div>
-
-              {/* Right Col: Spending & Optimization (1/3 width) */}
-              <div className="lg:col-span-2 lg:self-start space-y-6 md:space-y-8">
                 {/* Spending by Category */}
                 {result.normalizer && result.normalizer.totalSpend > 0 && (
-                  <div className="animate-slide-up" style={{ animationDelay: "400ms", animationFillMode: "both" }}>
+                  <div className="animate-slide-up" style={{ animationDelay: "200ms", animationFillMode: "both" }}>
                     <CategoryPieChart
                       categoryTotals={result.normalizer.categoryTotals}
                       totalSpend={result.normalizer.totalSpend}
                     />
                   </div>
                 )}
+              </div>
 
-                {/* QUBO Optimization */}
-                <div className="animate-slide-up" style={{ animationDelay: "500ms", animationFillMode: "both" }}>
+              {/* Right Col: QUBO Optimization (2/5) */}
+              <div className="lg:col-span-2 lg:self-start">
+                <div className="animate-slide-up" style={{ animationDelay: "250ms", animationFillMode: "both" }}>
                   <QUBOVisualization
                     quboResult={result.qubo_result}
                     allActions={[]}
@@ -672,6 +649,28 @@ export default function Home() {
                   />
                 </div>
               </div>
+            </div>
+
+            {/* 4. Action Plan */}
+            <div className="animate-slide-up" style={{ animationDelay: "300ms", animationFillMode: "both" }}>
+              <CollapsibleSection
+                title={t(lang, "yourActionPlan")}
+                subtitle={t(lang, "personalizedSteps")}
+                defaultOpen={true}
+              >
+                <PlanView plan={result.plan} lang={lang} />
+              </CollapsibleSection>
+            </div>
+
+            {/* 5. Financial Details */}
+            <div className="animate-slide-up" style={{ animationDelay: "350ms", animationFillMode: "both" }}>
+              <CollapsibleSection
+                title={t(lang, "financialDetails")}
+                subtitle={t(lang, "snapshotSubtitle")}
+                defaultOpen={false}
+              >
+                <SnapshotView snapshot={result.snapshot} lang={lang} />
+              </CollapsibleSection>
             </div>
 
             {/* 5. Start Over */}
