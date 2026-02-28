@@ -49,7 +49,7 @@ function MetricCard({
   sublabel?: string;
 }) {
   return (
-    <div className="bg-[#0f172a] rounded-lg px-4 py-3 text-center flex flex-col items-center justify-center">
+    <div className="bg-white/[0.03] backdrop-blur-sm border border-white/[0.06] rounded-lg px-4 py-3 text-center flex flex-col items-center justify-center">
       <p className="text-xs text-slate-500 font-medium">{label}</p>
       <div className="mt-1 text-lg font-semibold">{children}</div>
       {sublabel && (
@@ -64,9 +64,9 @@ function ActionChip({ action }: { action: SelectedAction }) {
   const [low, high] = action.estimated_monthly_impact;
 
   return (
-    <div className="group relative inline-flex items-center gap-1.5 rounded-full bg-teal-500/15 border border-teal-500/30 px-3 py-1.5 text-xs font-medium text-teal-300 transition-all duration-200">
+    <div className="group relative inline-flex items-center gap-1.5 rounded-full bg-cyan-500/15 border border-cyan-500/30 px-3 py-1.5 text-xs font-medium text-cyan-300 transition-all duration-200">
       <span
-        className="h-1.5 w-1.5 rounded-full bg-teal-400"
+        className="h-1.5 w-1.5 rounded-full bg-cyan-400"
         aria-hidden="true"
       />
       <span>{action.name}</span>
@@ -87,7 +87,7 @@ function HowItWorks() {
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="mt-5 rounded-lg border border-slate-700/50 bg-[#0f172a]/60">
+    <div className="mt-5 rounded-lg border border-white/[0.06] bg-white/[0.03] backdrop-blur-sm">
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
@@ -185,7 +185,7 @@ export default function QUBOVisualization({
       : null;
 
   return (
-    <div className="rounded-xl bg-[#1e293b] border border-slate-600/50 p-6 shadow-lg shadow-black/20 card-glow transition-all duration-300 animate-fade-in">
+    <div className="glass-card p-6 card-glow animate-fade-in">
       {/* ---- Header ---- */}
       <div className="flex items-start justify-between">
         <div>
@@ -206,7 +206,7 @@ export default function QUBOVisualization({
       <div className="mt-5 grid grid-cols-3 gap-3">
         {/* Actions Selected */}
         <MetricCard label="Actions Selected">
-          <span className={hasSelections ? "text-teal-400" : "text-red-400"}>
+          <span className={hasSelections ? "text-cyan-400" : "text-red-400"}>
             {selectedCount}
           </span>
           <span className="text-slate-500 text-sm font-normal">
@@ -222,7 +222,7 @@ export default function QUBOVisualization({
 
         {/* Optimization Score */}
         <MetricCard label="Optimization Score" sublabel="lower = better fit">
-          <span className="text-teal-400">
+          <span className="text-cyan-400">
             {Math.abs(quboResult.objective_value).toFixed(1)}
           </span>
         </MetricCard>
@@ -241,7 +241,7 @@ export default function QUBOVisualization({
       <div className="mt-5">
         {hasSelections ? (
           <>
-            <p className="text-xs font-medium uppercase tracking-wide text-teal-400 mb-2">
+            <p className="text-xs font-medium uppercase tracking-wide text-cyan-400 mb-2">
               Selected Actions
             </p>
             <div className="flex flex-wrap gap-2">
@@ -252,7 +252,7 @@ export default function QUBOVisualization({
                 : quboResult.selected_action_ids.map((id) => (
                     <span
                       key={id}
-                      className="inline-flex items-center rounded-full bg-teal-500/15 border border-teal-500/30 px-3 py-1.5 text-xs font-medium text-teal-300"
+                      className="inline-flex items-center rounded-full bg-cyan-500/15 border border-cyan-500/30 px-3 py-1.5 text-xs font-medium text-cyan-300"
                     >
                       {id}
                     </span>
@@ -260,7 +260,7 @@ export default function QUBOVisualization({
             </div>
           </>
         ) : (
-          <div className="flex items-start gap-2.5 rounded-lg border border-slate-600/40 bg-slate-800/50 px-4 py-3">
+          <div className="flex items-start gap-2.5 rounded-lg border border-white/[0.06] bg-white/[0.03] backdrop-blur-sm px-4 py-3">
             <InfoIcon />
             <p className="text-xs leading-relaxed text-slate-400">
               No actions could be optimized within the current constraints. The

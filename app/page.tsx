@@ -11,7 +11,6 @@ import RiskAlert from "../components/RiskAlert";
 import ChatBot from "../components/ChatBot";
 import ConversationalIntake from "../components/ConversationalIntake";
 import ScenarioSimulator from "../components/ScenarioSimulator";
-import ClimateWallet from "../components/ClimateWallet";
 import CategoryPieChart from "../components/CategoryPieChart";
 import CollapsibleSection from "../components/CollapsibleSection";
 import EquityCurve from "../components/EquityCurve";
@@ -27,8 +26,8 @@ const TRANSLATIONS: Record<string, Record<string, string>> = {
   ar: { getStarted: "\u0627\u0628\u062f\u0623", upload: "\u0642\u0645 \u0628\u062a\u062d\u0645\u064a\u0644 \u0645\u0639\u0627\u0645\u0644\u0627\u062a\u0643 \u0627\u0644\u0645\u0635\u0631\u0641\u064a\u0629 (CSV \u0623\u0648 JSON) \u0648\u0633\u0646\u0642\u0648\u0645 \u0628\u062a\u062d\u0644\u064a\u0644 \u0623\u0645\u0648\u0627\u0644\u0643 \u0644\u0625\u0646\u0634\u0627\u0621 \u062e\u0637\u0629 \u0639\u0645\u0644 \u0645\u062e\u0635\u0635\u0629.", fewDetails: "\u0628\u0639\u0636 \u0627\u0644\u062a\u0641\u0627\u0635\u064a\u0644", generatePlan: "\u0625\u0646\u0634\u0627\u0621 \u062e\u0637\u0629 \u0645\u0627\u0644\u064a\u0629", startOver: "\u0627\u0628\u062f\u0623 \u0645\u0646 \u062c\u062f\u064a\u062f", talkToAI: "\u062a\u062d\u062f\u062b \u0645\u0639 \u0627\u0644\u0630\u0643\u0627\u0621 \u0627\u0644\u0627\u0635\u0637\u0646\u0627\u0639\u064a" },
 };
 
-type AppMode = "copilot" | "scenario" | "climate";
-type Stage = "upload" | "chat-intake" | "profile" | "loading" | "results" | "scenario-results" | "climate-results";
+type AppMode = "copilot" | "scenario";
+type Stage = "upload" | "chat-intake" | "profile" | "loading" | "results" | "scenario-results";
 
 export default function Home() {
   const [stage, setStage] = useState<Stage>("upload");
@@ -43,13 +42,7 @@ export default function Home() {
   const [showFooterAbout, setShowFooterAbout] = useState(false);
   const [lang, setLang] = useState("en");
   const [scenarioTransactions, setScenarioTransactions] = useState<Array<{ date: string; description: string; amount: number; category?: string }> | null>(null);
-  const [climateTransactions, setClimateTransactions] = useState<Array<{ date: string; description: string; amount: number; category?: string }> | null>(null);
   const [scenarioNormalizer, setScenarioNormalizer] = useState<{
-    schemaMap: Array<{ sourceColumn: string; internalField: string; confidence: number; method: string }>;
-    warnings: string[];
-    transactionCount: number;
-  } | null>(null);
-  const [climateNormalizer, setClimateNormalizer] = useState<{
     schemaMap: Array<{ sourceColumn: string; internalField: string; confidence: number; method: string }>;
     warnings: string[];
     transactionCount: number;
@@ -207,36 +200,6 @@ export default function Home() {
     }
   }, []);
 
-  const handleClimateUpload = useCallback(async (f: File) => {
-    setStage("loading");
-    setError(null);
-    setLoadingStep("Analyzing your spending patterns...");
-
-    try {
-      const formData = new FormData();
-      formData.append("file", f);
-
-      const res = await fetch("/api/climate", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
-        throw new Error(errData.error || `Server error: ${res.status}`);
-      }
-
-      const data = await res.json();
-      setClimateTransactions(data.transactions);
-      setClimateNormalizer(data.normalizer);
-      setStage("climate-results");
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Something went wrong.";
-      setError(message);
-      setStage("upload");
-    }
-  }, []);
-
   const handleReset = useCallback(() => {
     setStage("upload");
     setFile(null);
@@ -245,9 +208,7 @@ export default function Home() {
     setError(null);
     setSessionKey((k) => k + 1);
     setScenarioTransactions(null);
-    setClimateTransactions(null);
     setScenarioNormalizer(null);
-    setClimateNormalizer(null);
     setAppMode("copilot");
   }, []);
 
@@ -383,16 +344,6 @@ export default function Home() {
               >
                 Scenario Simulator
               </button>
-              <button
-                onClick={() => setAppMode("climate")}
-                className={`flex-1 px-4 py-2.5 rounded-xl text-sm font-bold tracking-tight transition-all duration-300 ${
-                  appMode === "climate"
-                    ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/20"
-                    : "text-slate-400 hover:text-slate-200 hover:bg-white/5"
-                }`}
-              >
-                Climate Wallet
-              </button>
             </div>
 
             {/* Copilot Upload Card */}
@@ -495,39 +446,6 @@ export default function Home() {
               </div>
             )}
 
-            {/* Climate Wallet Upload Card */}
-            {appMode === "climate" && (
-              <div className="glass-card relative overflow-hidden p-6 md:p-10 card-glow border-emerald-500/15 shadow-black/40">
-                <div className="absolute -top-28 -right-20 w-72 h-72 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none" />
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-8">
-                  <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center border border-emerald-400/30 flex-shrink-0">
-                    <svg className="w-6 h-6 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h2 className="text-xl md:text-2xl font-bold text-slate-100 tracking-tight">Climate Wallet</h2>
-                    <p className="text-slate-300/85 text-sm mt-1 max-w-xl">
-                      Upload your transactions to analyze your spending patterns, discover where your money flows, and get personalized insights.
-                    </p>
-                  </div>
-                </div>
-                <FileUpload
-                  key={`climate-${sessionKey}`}
-                  onFileSelected={handleClimateUpload}
-                  onDemoLoad={() => {
-                    fetch("/demo/demo_transactions.csv")
-                      .then(r => r.blob())
-                      .then(blob => {
-                        const file = new File([blob], "demo_transactions.csv", { type: "text/csv" });
-                        handleClimateUpload(file);
-                      })
-                      .catch(() => setError("Failed to load demo data."));
-                  }}
-                  isLoading={false}
-                />
-              </div>
-            )}
 
             <div className="flex items-center justify-center gap-2 text-slate-600 text-[10px] font-bold uppercase tracking-widest pt-2">
               <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
@@ -560,16 +478,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* Stage: Climate Results */}
-        {stage === "climate-results" && climateTransactions && (
-          <div className="max-w-5xl mx-auto animate-slide-up">
-            <ClimateWallet
-              transactions={climateTransactions}
-              normalizer={climateNormalizer ?? undefined}
-              onBack={handleReset}
-            />
-          </div>
-        )}
 
         {/* Stage: Profile */}
         {stage === "profile" && (

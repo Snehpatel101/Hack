@@ -140,7 +140,7 @@ export default function SnapshotView({ snapshot }: { snapshot: FinancialSnapshot
   );
 
   const spendingCategories = [
-    { label: "Essentials", value: spending.essentials, color: "bg-teal-500" },
+    { label: "Essentials", value: spending.essentials, color: "bg-cyan-500" },
     { label: "Discretionary", value: spending.discretionary, color: "bg-cyan-400" },
     { label: "Debt Payments", value: spending.debt_payments, color: "bg-red-500" },
     { label: "Subscriptions", value: spending.subscriptions, color: "bg-sky-400" },
@@ -159,8 +159,8 @@ export default function SnapshotView({ snapshot }: { snapshot: FinancialSnapshot
           icon={<WalletIcon className="h-4 w-4" />}
           label="Checking Balance"
           value={formatCurrency(snapshot.checking_balance)}
-          accent={snapshot.checking_balance < 200 ? "text-red-400" : "text-teal-400"}
-          border="border-l-teal-500"
+          accent={snapshot.checking_balance < 200 ? "text-red-400" : "text-cyan-400"}
+          border="border-l-cyan-500"
         />
         <StatCard
           icon={<ArrowUpIcon className="h-4 w-4" />}
@@ -321,7 +321,7 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-xl bg-[#1e293b]/80 border border-slate-700/40 p-5 transition-all duration-300">
+    <section className="glass-card p-5 transition-all duration-300">
       <h3 className="text-sm font-semibold text-slate-100">{title}</h3>
       {subtitle && (
         <p className="mt-0.5 text-xs text-slate-500">{subtitle}</p>
@@ -350,7 +350,7 @@ function StatCard({
 }) {
   return (
     <div
-      className={`rounded-xl bg-[#1e293b]/80 border border-slate-700/40 border-l-2 ${border} p-4 transition-all duration-300`}
+      className={`glass-card border-l-2 ${border} p-4 transition-all duration-300`}
     >
       <p className="text-xs font-medium text-slate-500">{label}</p>
       <div className="mt-1.5 flex items-center gap-2">

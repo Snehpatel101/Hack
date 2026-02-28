@@ -70,16 +70,16 @@ function incomeHitsOnDate(income: RawIncome, targetDate: Date): boolean {
 }
 
 /**
- * Project the checking account balance forward 90 days.
+ * Project the checking account balance forward N days.
  */
-function projectBalance(snapshot: FinancialSnapshot): DataPoint[] {
+function projectBalance(snapshot: FinancialSnapshot, maxDays: number): DataPoint[] {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
   const points: DataPoint[] = [];
   let runningBalance = snapshot.checking_balance;
 
-  for (let day = 0; day <= 90; day++) {
+  for (let day = 0; day <= maxDays; day++) {
     const currentDate = addDays(today, day);
     const dayOfMonth = currentDate.getDate();
     const events: string[] = [];
@@ -121,8 +121,8 @@ const CHART_HEIGHT = SVG_HEIGHT - PADDING.top - PADDING.bottom;
 
 // ---- Coordinate Mapping ----
 
-function dataX(day: number): number {
-  return PADDING.left + (day / 90) * CHART_WIDTH;
+function dataX(day: number, maxDays: number): number {
+  return PADDING.left + (day / maxDays) * CHART_WIDTH;
 }
 
 function dataY(balance: number, minY: number, maxY: number): number {
@@ -138,17 +138,18 @@ function dataY(balance: number, minY: number, maxY: number): number {
 function buildSmoothPath(
   points: DataPoint[],
   minY: number,
-  maxY: number
+  maxY: number,
+  maxDays: number
 ): string {
   if (points.length === 0) return "";
   if (points.length === 1) {
-    const x = dataX(points[0].day);
+    const x = dataX(points[0].day, maxDays);
     const y = dataY(points[0].balance, minY, maxY);
     return `M${x},${y}`;
   }
 
   const coords = points.map((p) => ({
-    x: dataX(p.day),
+    x: dataX(p.day, maxDays),
     y: dataY(p.balance, minY, maxY),
   }));
 
@@ -214,13 +215,14 @@ function buildSmoothPath(
 function buildAreaPath(
   points: DataPoint[],
   minY: number,
-  maxY: number
+  maxY: number,
+  maxDays: number
 ): string {
-  const linePath = buildSmoothPath(points, minY, maxY);
+  const linePath = buildSmoothPath(points, minY, maxY, maxDays);
   if (!linePath || points.length === 0) return "";
 
-  const lastX = dataX(points[points.length - 1].day);
-  const firstX = dataX(points[0].day);
+  const lastX = dataX(points[points.length - 1].day, maxDays);
+  const firstX = dataX(points[0].day, maxDays);
   const bottomY = PADDING.top + CHART_HEIGHT;
 
   return `${linePath}L${lastX},${bottomY}L${firstX},${bottomY}Z`;
@@ -274,7 +276,8 @@ function computeYTicks(minY: number, maxY: number): number[] {
  */
 function riskWindowDayOffsets(
   riskWindows: RiskWindow[],
-  today: Date
+  today: Date,
+  maxDays: number
 ): { day: number; risk: RiskWindow }[] {
   const results: { day: number; risk: RiskWindow }[] = [];
   for (const rw of riskWindows) {
@@ -283,7 +286,7 @@ function riskWindowDayOffsets(
     if (isNaN(rwDate.getTime())) continue;
     const diffMs = rwDate.getTime() - today.getTime();
     const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
-    if (diffDays >= 0 && diffDays <= 90) {
+    if (diffDays >= 0 && diffDays <= maxDays) {
       results.push({ day: diffDays, risk: rw });
     }
   }
@@ -295,10 +298,11 @@ function riskWindowDayOffsets(
 export default function EquityCurve({ snapshot }: EquityCurveProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [showArea, setShowArea] = useState(false);
+  const [timeRange, setTimeRange] = useState<30 | 60 | 90>(90);
   const lineRef = useRef<SVGPathElement>(null);
 
   // Project balance data
-  const dataPoints = useMemo(() => projectBalance(snapshot), [snapshot]);
+  const dataPoints = useMemo(() => projectBalance(snapshot, timeRange), [snapshot, timeRange]);
 
   // Compute Y axis bounds
   const { minY, maxY } = useMemo(() => {
@@ -323,28 +327,60 @@ export default function EquityCurve({ snapshot }: EquityCurveProps) {
   // Y axis ticks
   const yTicks = useMemo(() => computeYTicks(minY, maxY), [minY, maxY]);
 
-  // X axis ticks
+  // X axis ticks (vary by time range)
   const xTicks = useMemo(() => {
-    const ticks = [0, 15, 30, 45, 60, 75, 90];
-    return ticks;
-  }, []);
+    if (timeRange === 30) return [0, 7, 14, 21, 30];
+    if (timeRange === 60) return [0, 15, 30, 45, 60];
+    return [0, 15, 30, 45, 60, 75, 90];
+  }, [timeRange]);
+
+  // X axis label lookup (vary by time range)
+  const xTickLabel = useMemo(() => {
+    if (timeRange === 30) {
+      return (day: number): string => {
+        if (day === 0) return "Today";
+        if (day === 7) return "Week 1";
+        if (day === 14) return "Week 2";
+        if (day === 21) return "Week 3";
+        if (day === 30) return "Day 30";
+        return `Day ${day}`;
+      };
+    }
+    if (timeRange === 60) {
+      return (day: number): string => {
+        if (day === 0) return "Today";
+        if (day === 15) return "Day 15";
+        if (day === 30) return "Month 1";
+        if (day === 45) return "Day 45";
+        if (day === 60) return "Month 2";
+        return `Day ${day}`;
+      };
+    }
+    return (day: number): string => {
+      if (day === 0) return "Today";
+      if (day === 30) return "Month 1";
+      if (day === 60) return "Month 2";
+      if (day === 90) return "Month 3";
+      return `Day ${day}`;
+    };
+  }, [timeRange]);
 
   // SVG paths
   const linePath = useMemo(
-    () => buildSmoothPath(dataPoints, minY, maxY),
-    [dataPoints, minY, maxY]
+    () => buildSmoothPath(dataPoints, minY, maxY, timeRange),
+    [dataPoints, minY, maxY, timeRange]
   );
   const areaPath = useMemo(
-    () => buildAreaPath(dataPoints, minY, maxY),
-    [dataPoints, minY, maxY]
+    () => buildAreaPath(dataPoints, minY, maxY, timeRange),
+    [dataPoints, minY, maxY, timeRange]
   );
 
   // Risk window markers
   const riskMarkers = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    return riskWindowDayOffsets(snapshot.risk_windows, today);
-  }, [snapshot.risk_windows]);
+    return riskWindowDayOffsets(snapshot.risk_windows, today, timeRange);
+  }, [snapshot.risk_windows, timeRange]);
 
   // Find lowest point
   const { lowestBalance, lowestDay } = useMemo(() => {
@@ -399,20 +435,37 @@ export default function EquityCurve({ snapshot }: EquityCurveProps) {
     index: number
   ): { x: number; y: number; anchor: "left" | "right" | "center" } => {
     const p = dataPoints[index];
-    const x = dataX(p.day);
+    const x = dataX(p.day, timeRange);
     const y = dataY(p.balance, minY, maxY);
     let anchor: "left" | "right" | "center" = "center";
     if (p.day <= 5) anchor = "left";
-    else if (p.day >= 85) anchor = "right";
+    else if (p.day >= timeRange - 5) anchor = "right";
     return { x, y, anchor };
   };
 
   return (
-    <div className="bg-[#1e293b] rounded-xl shadow-lg shadow-black/20 border border-slate-600/50 p-6 card-glow">
-      {/* Title */}
-      <h3 className="text-lg font-semibold text-slate-100 mb-4">
-        90-Day Balance Projection
-      </h3>
+    <div className="glass-card p-6 card-glow shadow-black/40">
+      {/* Title + Time Range Toggle */}
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-semibold text-slate-100">
+          {timeRange}-Day Balance Projection
+        </h3>
+        <div className="flex items-center gap-2">
+          {([30, 60, 90] as const).map((days) => (
+            <button
+              key={days}
+              onClick={() => setTimeRange(days)}
+              className={`px-3 py-1 rounded-full text-xs font-bold tracking-tight transition-all ${
+                timeRange === days
+                  ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40"
+                  : "text-slate-500 hover:text-slate-300 border border-transparent"
+              }`}
+            >
+              {days}D
+            </button>
+          ))}
+        </div>
+      </div>
 
       {/* SVG Chart */}
       <div className="w-full aspect-[7/3]">
@@ -420,7 +473,7 @@ export default function EquityCurve({ snapshot }: EquityCurveProps) {
           viewBox={`0 0 ${SVG_WIDTH} ${SVG_HEIGHT}`}
           className="w-full h-full"
           role="img"
-          aria-label="90-day balance projection chart showing projected checking account balance over the next 90 days"
+          aria-label={`${timeRange}-day balance projection chart showing projected checking account balance over the next ${timeRange} days`}
         >
           <defs>
             {/* Area gradient */}
@@ -496,8 +549,8 @@ export default function EquityCurve({ snapshot }: EquityCurveProps) {
 
           {/* Risk window bands */}
           {riskMarkers.map(({ day }, i) => {
-            const x = dataX(day);
-            const bandWidth = Math.max(CHART_WIDTH / 90, 8);
+            const x = dataX(day, timeRange);
+            const bandWidth = Math.max(CHART_WIDTH / timeRange, 8);
             return (
               <g key={`risk-band-${i}`}>
                 <rect
@@ -519,9 +572,9 @@ export default function EquityCurve({ snapshot }: EquityCurveProps) {
 
           {/* Today marker */}
           <line
-            x1={dataX(0)}
+            x1={dataX(0, timeRange)}
             y1={PADDING.top}
-            x2={dataX(0)}
+            x2={dataX(0, timeRange)}
             y2={PADDING.top + CHART_HEIGHT}
             stroke="#94a3b8"
             strokeDasharray="4 3"
@@ -529,7 +582,7 @@ export default function EquityCurve({ snapshot }: EquityCurveProps) {
             opacity="0.5"
           />
           <text
-            x={dataX(0)}
+            x={dataX(0, timeRange)}
             y={PADDING.top - 6}
             fill="#94a3b8"
             fontSize="10"
@@ -563,7 +616,7 @@ export default function EquityCurve({ snapshot }: EquityCurveProps) {
           {/* Event data point circles */}
           {eventIndices.map((idx) => {
             const p = dataPoints[idx];
-            const cx = dataX(p.day);
+            const cx = dataX(p.day, timeRange);
             const cy = dataY(p.balance, minY, maxY);
 
             // Determine dot color by event type
@@ -630,13 +683,8 @@ export default function EquityCurve({ snapshot }: EquityCurveProps) {
 
           {/* X axis labels */}
           {xTicks.map((day) => {
-            const x = dataX(day);
-            let label: string;
-            if (day === 0) label = "Today";
-            else if (day === 30) label = "Month 1";
-            else if (day === 60) label = "Month 2";
-            else if (day === 90) label = "Month 3";
-            else label = `Day ${day}`;
+            const x = dataX(day, timeRange);
+            const label = xTickLabel(day);
             return (
               <text
                 key={`x-label-${day}`}
@@ -776,14 +824,14 @@ export default function EquityCurve({ snapshot }: EquityCurveProps) {
 
       {/* Stats row */}
       <div className="flex flex-wrap gap-3 mt-4">
-        <div className="bg-[#0f172a] rounded-lg px-3 py-1.5">
+        <div className="bg-slate-950/50 border border-slate-800/40 rounded-lg px-3 py-1.5">
           <span className="text-xs text-slate-400">Starting</span>
           <span className="ml-2 text-sm font-medium text-slate-200">
             {formatCurrency(snapshot.checking_balance)}
           </span>
         </div>
 
-        <div className="bg-[#0f172a] rounded-lg px-3 py-1.5">
+        <div className="bg-slate-950/50 border border-slate-800/40 rounded-lg px-3 py-1.5">
           <span className="text-xs text-slate-400">Lowest</span>
           <span
             className={`ml-2 text-sm font-medium ${
@@ -794,7 +842,7 @@ export default function EquityCurve({ snapshot }: EquityCurveProps) {
           </span>
         </div>
 
-        <div className="bg-[#0f172a] rounded-lg px-3 py-1.5">
+        <div className="bg-slate-950/50 border border-slate-800/40 rounded-lg px-3 py-1.5">
           <span className="text-xs text-slate-400">Ending</span>
           <span className="ml-2 text-sm font-medium text-slate-200">
             {formatCurrency(endingBalance)}

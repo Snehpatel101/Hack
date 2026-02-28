@@ -513,12 +513,12 @@ export default function ConversationalIntake({
   })();
 
   return (
-    <div className="flex flex-col h-full max-h-[700px] rounded-2xl border border-slate-600/50 bg-[#0f172a] overflow-hidden">
+    <div className="flex flex-col h-full max-h-[700px] glass-card overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-3 bg-[#1e293b] border-b border-slate-600/50">
+      <div className="flex items-center justify-between px-5 py-3 bg-slate-900/30 border-b border-slate-800/30">
         <div className="flex items-center gap-3">
           {/* Bot avatar */}
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center flex-shrink-0">
             <svg
               className="w-4 h-4 text-white"
               fill="currentColor"
@@ -549,7 +549,7 @@ export default function ConversationalIntake({
       {/* Progress bar */}
       <div className="h-1 bg-slate-800">
         <div
-          className="h-full bg-gradient-to-r from-teal-500 to-cyan-500 transition-all duration-500 ease-out"
+          className="h-full bg-gradient-to-r from-cyan-500 to-blue-500 transition-all duration-500 ease-out"
           style={{ width: `${(Math.min(stepIndex + 1, 7) / 7) * 100}%` }}
         />
       </div>
@@ -567,7 +567,7 @@ export default function ConversationalIntake({
             }`}
           >
             {msg.role === "bot" && (
-              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center flex-shrink-0 mt-0.5">
                 <svg
                   className="w-3.5 h-3.5 text-white"
                   fill="currentColor"
@@ -580,7 +580,7 @@ export default function ConversationalIntake({
             <div
               className={`rounded-2xl px-4 py-2.5 text-sm leading-relaxed max-w-[80%] ${
                 msg.role === "user"
-                  ? "bg-teal-500/20 text-slate-100 rounded-tr-md"
+                  ? "bg-cyan-500/20 text-slate-100 rounded-tr-md"
                   : "bg-slate-700/60 text-slate-100 rounded-tl-md"
               }`}
             >
@@ -592,7 +592,7 @@ export default function ConversationalIntake({
         {/* Typing indicator */}
         {isTyping && (
           <div className="flex items-start gap-2.5 animate-slideUp">
-            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center flex-shrink-0 mt-0.5">
               <svg
                 className="w-3.5 h-3.5 text-white"
                 fill="currentColor"
@@ -625,7 +625,7 @@ export default function ConversationalIntake({
 
       {/* Input area */}
       {!isDone && !isTyping && (
-        <div className="border-t border-slate-600/50 bg-[#1e293b] px-4 py-4 animate-slideUp">
+        <div className="border-t border-slate-800/30 bg-slate-900/30 px-4 py-4 animate-slideUp">
           {/* Number input steps */}
           {isNumberStep && (
             <div className="flex items-center gap-2">
@@ -642,14 +642,14 @@ export default function ConversationalIntake({
                   onKeyDown={handleKeyDown}
                   placeholder="0.00"
                   autoFocus
-                  className="block w-full rounded-lg border border-slate-600/50 bg-[#1e293b] py-2.5 pl-7 pr-4 text-sm text-slate-100 placeholder-slate-600 shadow-lg shadow-black/20 transition-all duration-300 focus:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                  className="block w-full rounded-lg border border-slate-800/30 bg-slate-900/40 py-2.5 pl-7 pr-4 text-sm text-slate-100 placeholder-slate-600 shadow-lg shadow-black/20 transition-all duration-300 focus:border-cyan-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/20"
                 />
               </div>
               <button
                 type="button"
                 onClick={handleNumberSubmit}
                 disabled={!numberValid}
-                className="rounded-lg bg-gradient-to-r from-teal-500 to-cyan-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-teal-500/20 transition-all duration-300 hover:from-teal-600 hover:to-cyan-600 disabled:cursor-not-allowed disabled:opacity-40"
+                className="btn-primary rounded-lg px-5 py-2.5 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Next
               </button>
@@ -662,7 +662,7 @@ export default function ConversationalIntake({
               {multiEntries.map((entry, i) => (
                 <div
                   key={i}
-                  className="flex items-center gap-2 rounded-lg border border-slate-600/50 bg-[#0f172a] p-2.5"
+                  className="flex items-center gap-2 rounded-lg border border-slate-800/30 bg-slate-900/40 p-2.5"
                 >
                   <input
                     type="text"
@@ -670,7 +670,7 @@ export default function ConversationalIntake({
                     value={entry.name}
                     onChange={(e) => updateMultiEntry(i, "name", e.target.value)}
                     autoFocus={i === multiEntries.length - 1}
-                    className="flex-1 min-w-0 rounded-md border border-slate-600/50 bg-[#1e293b] px-3 py-2 text-sm text-slate-100 placeholder-slate-600 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500/20"
+                    className="flex-1 min-w-0 rounded-md border border-slate-800/30 bg-slate-900/40 px-3 py-2 text-sm text-slate-100 placeholder-slate-600 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/20"
                   />
                   <div className="relative w-28">
                     <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-2.5 text-slate-500 text-sm">
@@ -685,7 +685,7 @@ export default function ConversationalIntake({
                       onChange={(e) =>
                         updateMultiEntry(i, "amount", e.target.value)
                       }
-                      className="w-full rounded-md border border-slate-600/50 bg-[#1e293b] py-2 pl-6 pr-2 text-sm text-slate-100 placeholder-slate-600 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500/20"
+                      className="w-full rounded-md border border-slate-800/30 bg-slate-900/40 py-2 pl-6 pr-2 text-sm text-slate-100 placeholder-slate-600 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/20"
                     />
                   </div>
                   {multiEntries.length > 1 && (
@@ -707,7 +707,7 @@ export default function ConversationalIntake({
                 <button
                   type="button"
                   onClick={addMultiEntry}
-                  className="flex items-center gap-1.5 rounded-lg border border-teal-500/30 bg-teal-500/10 px-3 py-2 text-xs font-medium text-teal-400 hover:bg-teal-500/20 transition-colors"
+                  className="flex items-center gap-1.5 rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-3 py-2 text-xs font-medium text-cyan-400 hover:bg-cyan-500/20 transition-colors"
                 >
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -727,7 +727,7 @@ export default function ConversationalIntake({
                 <button
                   type="button"
                   onClick={() => handleMultiSubmit(false)}
-                  className="rounded-lg bg-gradient-to-r from-teal-500 to-cyan-500 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-teal-500/20 transition-all duration-300 hover:from-teal-600 hover:to-cyan-600"
+                  className="btn-primary rounded-lg px-5 py-2 text-sm font-semibold"
                 >
                   Next
                 </button>
@@ -741,7 +741,7 @@ export default function ConversationalIntake({
               {debtEntries.map((entry, i) => (
                 <div
                   key={i}
-                  className="rounded-lg border border-slate-600/50 bg-[#0f172a] p-3 space-y-2"
+                  className="rounded-lg border border-slate-800/30 bg-slate-900/40 p-3 space-y-2"
                 >
                   <div className="flex items-center gap-2">
                     <input
@@ -752,7 +752,7 @@ export default function ConversationalIntake({
                         updateDebtEntry(i, "name", e.target.value)
                       }
                       autoFocus={i === debtEntries.length - 1}
-                      className="flex-1 min-w-0 rounded-md border border-slate-600/50 bg-[#1e293b] px-3 py-2 text-sm text-slate-100 placeholder-slate-600 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500/20"
+                      className="flex-1 min-w-0 rounded-md border border-slate-800/30 bg-slate-900/40 px-3 py-2 text-sm text-slate-100 placeholder-slate-600 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/20"
                     />
                     {debtEntries.length > 1 && (
                       <button
@@ -781,7 +781,7 @@ export default function ConversationalIntake({
                         onChange={(e) =>
                           updateDebtEntry(i, "balance", e.target.value)
                         }
-                        className="w-full rounded-md border border-slate-600/50 bg-[#1e293b] py-2 pl-6 pr-2 text-sm text-slate-100 placeholder-slate-600 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500/20"
+                        className="w-full rounded-md border border-slate-800/30 bg-slate-900/40 py-2 pl-6 pr-2 text-sm text-slate-100 placeholder-slate-600 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/20"
                       />
                     </div>
                     <div className="relative w-20">
@@ -794,7 +794,7 @@ export default function ConversationalIntake({
                         onChange={(e) =>
                           updateDebtEntry(i, "apr", e.target.value)
                         }
-                        className="w-full rounded-md border border-slate-600/50 bg-[#1e293b] py-2 px-2.5 pr-7 text-sm text-slate-100 placeholder-slate-600 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500/20"
+                        className="w-full rounded-md border border-slate-800/30 bg-slate-900/40 py-2 px-2.5 pr-7 text-sm text-slate-100 placeholder-slate-600 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/20"
                       />
                       <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2.5 text-slate-500 text-xs">
                         %
@@ -813,7 +813,7 @@ export default function ConversationalIntake({
                         onChange={(e) =>
                           updateDebtEntry(i, "minimum_payment", e.target.value)
                         }
-                        className="w-full rounded-md border border-slate-600/50 bg-[#1e293b] py-2 pl-6 pr-2 text-sm text-slate-100 placeholder-slate-600 focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500/20"
+                        className="w-full rounded-md border border-slate-800/30 bg-slate-900/40 py-2 pl-6 pr-2 text-sm text-slate-100 placeholder-slate-600 focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500/20"
                       />
                     </div>
                   </div>
@@ -824,7 +824,7 @@ export default function ConversationalIntake({
                 <button
                   type="button"
                   onClick={addDebtEntry}
-                  className="flex items-center gap-1.5 rounded-lg border border-teal-500/30 bg-teal-500/10 px-3 py-2 text-xs font-medium text-teal-400 hover:bg-teal-500/20 transition-colors"
+                  className="flex items-center gap-1.5 rounded-lg border border-cyan-500/30 bg-cyan-500/10 px-3 py-2 text-xs font-medium text-cyan-400 hover:bg-cyan-500/20 transition-colors"
                 >
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -842,7 +842,7 @@ export default function ConversationalIntake({
                 <button
                   type="button"
                   onClick={() => handleDebtSubmit(false)}
-                  className="rounded-lg bg-gradient-to-r from-teal-500 to-cyan-500 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-teal-500/20 transition-all duration-300 hover:from-teal-600 hover:to-cyan-600"
+                  className="btn-primary rounded-lg px-5 py-2 text-sm font-semibold"
                 >
                   Next
                 </button>
@@ -859,8 +859,8 @@ export default function ConversationalIntake({
                     key={g.value}
                     className={`flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition-all duration-300 ${
                       selectedGoal === g.value
-                        ? "border-teal-500 bg-teal-500/10 ring-1 ring-teal-500"
-                        : "border-slate-600/50 bg-[#0f172a] hover:border-slate-500 hover:bg-slate-800/50"
+                        ? "border-cyan-500 bg-cyan-500/10 ring-1 ring-cyan-500"
+                        : "border-slate-800/30 bg-slate-900/40 hover:border-slate-500 hover:bg-slate-800/50"
                     }`}
                   >
                     <input
@@ -869,7 +869,7 @@ export default function ConversationalIntake({
                       value={g.value}
                       checked={selectedGoal === g.value}
                       onChange={(e) => setSelectedGoal(e.target.value)}
-                      className="mt-0.5 h-4 w-4 border-slate-600 text-teal-500 focus:ring-teal-500"
+                      className="mt-0.5 h-4 w-4 border-slate-600 text-cyan-500 focus:ring-cyan-500"
                     />
                     <div>
                       <span className="text-sm font-medium text-slate-200">
@@ -883,7 +883,7 @@ export default function ConversationalIntake({
               <button
                 type="button"
                 onClick={handleGoalSubmit}
-                className="w-full rounded-lg bg-gradient-to-r from-teal-500 to-cyan-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-teal-500/20 transition-all duration-300 hover:from-teal-600 hover:to-cyan-600 hover:shadow-teal-500/40"
+                className="btn-primary w-full rounded-lg px-5 py-2.5 text-sm font-semibold"
               >
                 Analyze My Finances
               </button>

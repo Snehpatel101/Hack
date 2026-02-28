@@ -25,7 +25,7 @@ const PRIORITY_BADGE: Record<
     label: "Must Do",
   },
   should_do: {
-    className: "bg-teal-500/20 text-teal-400",
+    className: "bg-cyan-500/20 text-cyan-400",
     label: "Should Do",
   },
   nice_to_have: {
@@ -48,14 +48,14 @@ export default function PlanView({ plan }: PlanViewProps) {
   return (
     <div className="space-y-8 animate-fade-in">
       {/* ── Summary ── */}
-      <section className="rounded-xl bg-[#1e293b] border border-slate-600/50 p-6 shadow-lg shadow-black/20 card-glow transition-all duration-300">
+      <section className="glass-card p-6 card-glow shadow-black/40 transition-all duration-300">
         <h2 className="text-lg font-bold text-slate-100">
           Your Financial Plan
         </h2>
         <p className="mt-2 text-sm leading-relaxed text-slate-400">
           {plan.summary}
         </p>
-        <p className="mt-3 text-sm font-medium text-teal-400">
+        <p className="mt-3 text-sm font-medium text-cyan-400">
           Estimated savings: {formatCurrency(savingsLow)}&ndash;
           {formatCurrency(savingsHigh)}/month
         </p>
@@ -67,7 +67,7 @@ export default function PlanView({ plan }: PlanViewProps) {
       {/* ── Top 3 Priority Actions ── */}
       {top3.length > 0 && (
         <section>
-          <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-teal-400/80">
+          <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-cyan-400/80">
             Top 3 Priority Actions
           </h3>
           <div className="space-y-4">
@@ -92,13 +92,13 @@ export default function PlanView({ plan }: PlanViewProps) {
             {remaining.map((action, index) => (
               <li
                 key={action.action_id || `remaining-${index}`}
-                className="flex items-center justify-between rounded-lg bg-[#1e293b]/60 px-4 py-2"
+                className="flex items-center justify-between bg-slate-900/30 border border-slate-800/30 rounded-lg px-4 py-2"
               >
                 <span className="text-sm text-slate-300 truncate mr-3">
                   {action.action_name}
                 </span>
                 {action.estimated_savings && (
-                  <span className="flex-shrink-0 text-xs text-teal-400/70">
+                  <span className="flex-shrink-0 text-xs text-cyan-400/70">
                     {action.estimated_savings}
                   </span>
                 )}
@@ -142,11 +142,11 @@ function TopActionCard({
     .filter((s) => s.length > 0);
 
   return (
-    <article className="rounded-xl border border-slate-600/50 bg-[#1e293b] p-5 shadow-lg shadow-black/20 card-glow transition-all duration-300 animate-slide-up">
+    <article className="glass-card p-5 card-glow shadow-black/40 transition-all duration-300 animate-slide-up">
       {/* Header row */}
       <div className="flex items-start gap-3">
         {/* Step number */}
-        <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-teal-500/15 text-sm font-bold text-teal-400">
+        <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-cyan-500/15 text-sm font-bold text-cyan-400">
           {step}
         </span>
 
@@ -179,7 +179,7 @@ function TopActionCard({
                 key={i}
                 className="flex items-start gap-2 text-sm text-slate-300"
               >
-                <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-teal-500/15 text-xs font-medium text-teal-400">
+                <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-cyan-500/15 text-xs font-medium text-cyan-400">
                   {i + 1}
                 </span>
                 <span>{s}</span>
@@ -191,7 +191,7 @@ function TopActionCard({
 
       {/* Estimated savings */}
       {action.estimated_savings && (
-        <p className="mt-3 pl-10 text-xs font-medium text-teal-400/80">
+        <p className="mt-3 pl-10 text-xs font-medium text-cyan-400/80">
           Estimated savings: {action.estimated_savings}
         </p>
       )}

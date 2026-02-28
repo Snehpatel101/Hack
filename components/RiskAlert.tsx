@@ -10,7 +10,7 @@ export default function RiskAlert({ alerts }: RiskAlertProps) {
   return (
     <div
       role="alert"
-      className="rounded-xl border border-red-500/30 bg-gradient-to-r from-red-900/30 to-red-800/20 p-4 shadow-lg shadow-red-500/10 animate-pulse-glow animate-slide-up"
+      className="glass-card border-red-500/30 bg-gradient-to-r from-red-900/20 to-red-800/10 p-4 shadow-lg shadow-red-500/10 animate-pulse-glow animate-slide-up"
       style={{
         animationName: "pulseGlow",
         // Override the glow color for red

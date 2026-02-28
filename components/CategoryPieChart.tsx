@@ -293,7 +293,7 @@ function LegendItem({
 
   return (
     <li
-      className="flex items-center gap-2.5 py-1"
+      className="flex items-center gap-2.5 py-1.5"
       style={{
         opacity: isMounted ? 1 : 0,
         transform: isMounted ? "translateY(0)" : "translateY(8px)",
@@ -304,13 +304,14 @@ function LegendItem({
         className="inline-block h-3 w-3 flex-shrink-0 rounded-full"
         style={{ backgroundColor: slice.color }}
       />
-      <span className="text-sm text-slate-300">
+      <span className="text-sm text-slate-300 truncate flex-1 min-w-0">
         {capitalize(slice.category)}
-        <span className="mx-1.5 text-slate-600">&mdash;</span>
+      </span>
+      <span className="text-sm text-slate-400 flex-shrink-0 tabular-nums">
         {formatDollars(slice.value)}
       </span>
-      <span className="text-sm text-slate-500">
-        ({formatPercentage(slice.percentage)})
+      <span className="text-xs text-slate-500 flex-shrink-0">
+        {formatPercentage(slice.percentage)}
       </span>
     </li>
   );
@@ -393,7 +394,7 @@ export default function CategoryPieChart({
   const isSingleCategory = slices.length === 1;
 
   return (
-    <div className="bg-[#1e293b] rounded-xl shadow-lg shadow-black/20 border border-slate-600/50 p-6 card-glow">
+    <div className="glass-card p-6 card-glow shadow-black/40 overflow-hidden">
       {/* Title */}
       <h3 className="text-lg font-semibold text-slate-100 mb-4">{title}</h3>
 
@@ -404,7 +405,7 @@ export default function CategoryPieChart({
             onClick={() => setSelectedCategories(new Set())}
             className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
               selectedCategories.size === 0
-                ? "bg-teal-500/20 text-teal-300 border border-teal-500/40"
+                ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40"
                 : "bg-slate-700/50 text-slate-400 border border-slate-600/30 hover:bg-slate-700"
             }`}
           >
@@ -416,7 +417,7 @@ export default function CategoryPieChart({
               onClick={() => toggleCategory(cat)}
               className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
                 selectedCategories.has(cat)
-                  ? "bg-teal-500/20 text-teal-300 border border-teal-500/40"
+                  ? "bg-cyan-500/20 text-cyan-300 border border-cyan-500/40"
                   : "bg-slate-700/50 text-slate-400 border border-slate-600/30 hover:bg-slate-700"
               }`}
             >
@@ -433,7 +434,7 @@ export default function CategoryPieChart({
         </div>
       ) : (
         /* Chart + Legend layout */
-        <div className="flex flex-col lg:flex-row lg:items-start lg:gap-8 gap-6">
+        <div className="flex flex-col lg:flex-row lg:items-start lg:gap-8 gap-6 overflow-hidden">
           {/* SVG Pie Chart */}
           <div className="flex-shrink-0 mx-auto lg:mx-0">
             <svg
@@ -514,7 +515,7 @@ export default function CategoryPieChart({
 
           {/* Legend */}
           <div className="flex-1 min-w-0">
-            <ul className="space-y-0.5">
+            <ul className="space-y-0.5 overflow-hidden">
               {slices.map((slice, i) => (
                 <LegendItem
                   key={slice.category}
